@@ -698,7 +698,7 @@ function fireSide(v,s,target,st){const n=s>0?v.cl:v.cr,a0=Math.atan2(target.x-v.
     const m=new THREE.Mesh(G.sph,new THREE.MeshStandardMaterial({color:T.shot,emissive:T.shotE,emissiveIntensity:.4,roughness:.35}));const r=.24*(.85+.15*sc);m.scale.setScalar(r);m.position.set(x,y,z);m.castShadow=true;scene.add(m);
     const aa=a+(n>1?(i-(n-1)/2)*.05:0);shots.push({m,vx:Math.sin(aa)*st.pspeed,vz:Math.cos(aa)*st.pspeed,t:0,life:st.range/st.pspeed,dmg:st.dmg,owner:v,r});if(near(x,z))puff(x,y,z,T.shot,2,1.5,.5);}
   v.recoil=1;if(v.isPlayer)SFX.shoot();else if(near(v.x,v.z,18))SFX.far();}
-function damage(v,amt,from,dx,dz){if(!v.alive||state!=='play'||(won&&v.isPlayer))return;if(v.isPlayer)amt*=(from===boss?1:.75)*Math.min(1.8,1+.12*(day-1));amt=Math.round(amt);v.hp-=amt;v.hitT=.2;const k=2.2/v.scale;v.kx+=dx*k;v.kz+=dz*k;
+function damage(v,amt,from,dx,dz){if(!v.alive||state!=='play'||(won&&v.isPlayer))return;if(v.isPlayer)amt*=(from===boss?.8:.6)*Math.min(1.7,1+.1*(day-1));amt=Math.round(amt);v.hp-=amt;v.hitT=.2;const k=2.2/v.scale;v.kx+=dx*k;v.kz+=dz*k;
   if(v.isPlayer){floatAt('-'+amt,v.x,3.2*v.scale,v.z,'me');SFX.hurt();if(amt>=14&&simT-lastHurt>1.2){lastHurt=simT;emote(v,'好痛！',1);$('hurt').style.opacity=.55;setTimeout(()=>$('hurt').style.opacity=0,160);}}
   else if(from===player&&near(v.x,v.z)){floatAt('-'+amt,v.x,3*v.scale,v.z);{SFX.hit();if(rnd()<.12)emote(v,['哎哟','别打啦','疼疼疼'][Math.floor(rnd(3))],1);}}
   if(!v.isPlayer&&from&&from.alive!==false&&v.ai.mode!=='flee'&&from!==boss){if(v.ai.mode!=='fight')v.ai.fightT=rnd(7,12);v.ai.target=from;v.ai.mode='fight';}
@@ -723,7 +723,7 @@ function tryDash(v){if(v.energy>=35&&v.dashT<=0){v.energy-=35;v.dashT=.38;if(nea
 function attackersOn(t,self){let n=0;for(const o of vehicles)if(o!==self&&o.alive&&!o.isPlayer&&o.ai.mode==='fight'&&o.ai.target===t)n++;return n;}
 function aiThink(a){const A=a.ai;A.think=rnd(.35,.7);const st=stats(a);let best=null,bd=17+3*a.scale,threat=null,td=14;
   for(const o of vehicles){if(o===a||!o.alive)continue;const d=Math.hypot(o.x-a.x,o.z-a.z);if(d<td){threat=o;td=d;}
-    if(o.isPlayer){if(o.corn&&d>6)continue;if(attackersOn(o,a)>=Math.min(6,(player.lv>=5?3:2)+(day-1)))continue;if(playT<6)continue;}
+    if(o.isPlayer){if(o.corn&&d>6)continue;if(attackersOn(o,a)>=Math.min(5,(player.lv>=5?2:1)+(day-1)))continue;if(playT<6)continue;}
     else if(attackersOn(o,a)>=1)continue;
     if(o.lv>a.lv+2)continue;const w=d*(o.isPlayer?.85:1.15);if(w<bd){best=o;bd=w;}}
   if(A.mode==='fight'&&A.target&&A.target.alive&&Math.hypot(A.target.x-a.x,A.target.z-a.z)<24&&!(A.target.isPlayer&&A.target.corn))best=A.target;
@@ -794,7 +794,7 @@ function bossUpdate(dt){const B=boss;if(!B.alive)return;const K=B.kind,nm=BOSSES
       if(K===0){if(d<11&&r<.5){B.state='stompTel';B.t=0;}else if(r<.75||d>20)toCharge();else{B.state='spit';B.t=0;B.n=enr?3:2;}}
       else if(K===1){if(r<.5||d>18)toCharge();else{B.state='radial';B.t=0;B.n=enr?3:2;}}
       else{if(r<.45){B.state='bombTel';B.t=0;B.pts=[[player.x,player.z]];for(let i=0;i<(enr?4:3);i++){const a=rnd(6.28),q=rnd(3,8);B.pts.push([clamp(player.x+Math.sin(a)*q,-HALF+3,HALF-3),clamp(player.z+Math.cos(a)*q,-HALF+3,HALF-3)]);}}else if(r<.75||d>20)toCharge();else{B.state='spit';B.t=0;B.n=enr?3:2;}}
-      B.cd=enr?1.3:2.0;}}
+      B.cd=enr?1.6:2.4;}}
   else if(B.state==='chargeTel'){B.h+=clamp(angDiff(ang,B.h),-1.2*dt,1.2*dt);B.strip.visible=true;B.strip.position.set(B.x,0,B.z);B.strip.rotation.y=B.h;B.strip.children[0].material.opacity=.4+.3*Math.abs(Math.sin(B.t*12));if(B.t>(K===1?.7:.9)){B.state='charge';B.t=0;B.strip.visible=false;SFX.roar();}}
   else if(B.state==='charge'){B.x+=Math.sin(B.h)*32*dt;B.z+=Math.cos(B.h)*32*dt;if(rnd()<dt*40)puff(B.x,.5,B.z,K===2?0xffb347:0xe9dcae,1,2,1.6);
     if(d<B.R+1.3*player.scale&&B.touch<=0){damage(player,30,boss,Math.sin(B.h)*9,Math.cos(B.h)*9);B.touch=.8;}
@@ -819,7 +819,7 @@ function startDay(){day++;phase='day';won=false;for(const m of boss.models)m.g.v
 function startNight(){if(phase!=='day')return;phase='night';if(player.alive){player.hp=stats(player).maxhp;floatAt('回满血！',player.x,3.8*player.scale,player.z,'big');}timeLeft=0;showBanner('天黑了，捣蛋鬼们溜走了…',2.4);boss.g.visible=false;
   for(const v of vehicles)if(!v.isPlayer){if(v.alive)puff(v.x,1.2,v.z,0xffffff,8,4,1.2);v.alive=false;v.koT=0;v.vis.root.visible=false;v.tag.style.display='none';v.respawn=1e9;}
   nightT=0;}
-function spawnBoss(){const a=rnd(6.28);boss.x=clamp(player.x+Math.sin(a)*22,-HALF+6,HALF-6);boss.z=clamp(player.z+Math.cos(a)*22,-HALF+6,HALF-6);boss.g.visible=true;phase='intro';introT=0;boss.max=boss.hp=Math.round((1500+player.lv*60)*(1+.45*(day-1)));boss.sum=false;boss.R=BOSSES[boss.kind].R;boss.tag.firstChild.textContent=BOSSES[boss.kind].name;document.querySelector('#bossIntro .n').textContent=BOSSES[boss.kind].name;document.querySelector('#bossIntro .s').textContent=BOSSES[boss.kind].sub;boss.alive=true;boss.enr=false;boss.popped=boss.roared=false;boss.state='walk';boss.t=0;boss.cd=Math.max(1.2,2.5-.25*(day-1));Fur(0x9a6a4a).emissive.setHex(0);boss.h=Math.atan2(player.x-boss.x,player.z-boss.z);boss.g.position.set(boss.x,0,boss.z);boss.g.rotation.y=boss.h;boss.g.scale.setScalar(.001);$('bossIntro').classList.add('on');$('banner').classList.remove('on');for(let i=0;i<4;i++)tone(880,620,.2,'square',.05,i*.3);
+function spawnBoss(){const a=rnd(6.28);boss.x=clamp(player.x+Math.sin(a)*22,-HALF+6,HALF-6);boss.z=clamp(player.z+Math.cos(a)*22,-HALF+6,HALF-6);boss.g.visible=true;phase='intro';introT=0;boss.max=boss.hp=Math.round((1300+player.lv*50)*(1+.45*(day-1)));boss.sum=false;boss.R=BOSSES[boss.kind].R;boss.tag.firstChild.textContent=BOSSES[boss.kind].name;document.querySelector('#bossIntro .n').textContent=BOSSES[boss.kind].name;document.querySelector('#bossIntro .s').textContent=BOSSES[boss.kind].sub;boss.alive=true;boss.enr=false;boss.popped=boss.roared=false;boss.state='walk';boss.t=0;boss.cd=Math.max(1.2,2.5-.25*(day-1));Fur(0x9a6a4a).emissive.setHex(0);boss.h=Math.atan2(player.x-boss.x,player.z-boss.z);boss.g.position.set(boss.x,0,boss.z);boss.g.rotation.y=boss.h;boss.g.scale.setScalar(.001);$('bossIntro').classList.add('on');$('banner').classList.remove('on');for(let i=0;i<4;i++)tone(880,620,.2,'square',.05,i*.3);
     $('time').style.display='none';}
 
 /* =============== input =============== */
@@ -951,7 +951,7 @@ function step(dt){simT+=dt;if(state!=='play')return;playT+=dt;streakT-=dt;pickT-
       if(boss&&boss.alive&&phase==='boss'&&v.isPlayer){const dx=boss.x-v.x,dz=boss.z-v.z,d=Math.hypot(dx,dz)-boss.R;if(d<bd&&Math.abs(angDiff(Math.atan2(dx,dz),nh))<.8){best=boss;bd=d;}}
       for(const o of vehicles){if(o===v||!o.alive)continue;if(!v.isPlayer&&o.isPlayer&&o.corn&&Math.hypot(o.x-v.x,o.z-v.z)>6)continue;if(!v.isPlayer&&!o.isPlayer&&v.ai.target!==o&&o.ai.target!==v)continue;const dx=o.x-v.x,dz=o.z-v.z,d=Math.hypot(dx,dz);if(d<bd&&Math.abs(angDiff(Math.atan2(dx,dz),nh))<.75){best=o;bd=d;}}
       if(best){fireSide(v,s,best,st);fired=true;}}
-    v.fireT=fired?st.fire*(v.isPlayer?1:1.35):.1;}
+    v.fireT=fired?st.fire*(v.isPlayer?1:1.5):.1;}
   /* shots */
   for(let i=shots.length-1;i>=0;i--){const p=shots[i];p.t+=dt;p.m.position.x+=p.vx*dt;p.m.position.z+=p.vz*dt;let dead=p.t>p.life;const px=p.m.position.x,pz=p.m.position.z;
     if(!dead&&solids.some(s=>s.r>1&&Math.hypot(s.x-px,s.z-pz)<s.r))dead=true;
@@ -970,7 +970,7 @@ function step(dt){simT+=dt;if(state!=='play')return;playT+=dt;streakT-=dt;pickT-
     c.ry+=dt*2;
     if(got){carrots.splice(i,1);gainXp(got,1);if(got.isPlayer){pickC=pickT>0?Math.min(14,pickC+1):0;pickT=.9;const f=Math.pow(2,pickC/12);tone(880*f,1320*f,.08,'sine',.05);}}}
   /* hearts */
-  heartT-=dt;if(heartT<=0&&phase!=='night'&&phase!=='intro'){heartT=phase==='day'?9:7;if(hearts.length<(phase==='day'?5:2))randomHeart();}
+  heartT-=dt;if(heartT<=0&&phase!=='night'&&phase!=='intro'){heartT=phase==='day'?7:5;if(hearts.length<(phase==='day'?5:3))randomHeart();}
   for(let i=hearts.length-1;i>=0;i--){const h=hearts[i];h.t+=dt;h.g.position.set(h.x,1.35+Math.sin(h.t*3)*.18,h.z);h.g.rotation.y=h.t*2;const pl=1+Math.sin(h.t*3)*.04;h.g.scale.setScalar(1.25*pl);h.gl.position.set(h.x,.07,h.z);h.gl.material.opacity=.65;
     let got=null;for(const v of vehicles){if(!v.alive)continue;const mh=stats(v).maxhp;if(Math.hypot(v.x-h.x,v.z-h.z)<1.3*v.scale+.7&&v.hp<mh*(v.isPlayer?.999:.7)){got=v;v.hp=Math.min(mh,v.hp+mh*.4);break;}}
     if(got){scene.remove(h.g);scene.remove(h.gl);h.gl.material.dispose();hearts.splice(i,1);if(near(h.x,h.z))puff(h.x,1.4,h.z,0xff8a9a,10,4,.8);if(near(h.x,h.z))ringFx(h.x,h.z,0xff8a9a,5,.5);if(got.isPlayer){floatAt('奶奶的苹果派 +40%',got.x,3.8*got.scale,got.z,'big');tone(660,990,.12,'sine',.07);tone(990,1320,.16,'sine',.07,.1);emote(got,'好香~',1.3);}}}
