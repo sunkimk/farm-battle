@@ -416,8 +416,10 @@ function critter(type,look){const g=new THREE.Group(),head=new THREE.Group();g.u
   }else if(type===7){/* girl with a bob, red scarf and black tee */const skin=Fur(0xffe0c8),hair=Fur(FURS[7][look.fur]),tee=Toy(0x22242a),red=Toy(0xe8413c);
     ball(tee,0,-.02,0,.44,.42,.38,g);for(const s of[-1,1]){ball(tee,s*.42,.06,.14,.15,.15,.17,g);ball(skin,s*.44,.02,.36,.11,.11,.12,g);}
     const sc=torus(red,0,.36,.04,.36,.13,g);sc.rotation.x=Math.PI/2;sc.scale.z=.85;const tl=cap(red,-.26,.1,.38,.1,.3,g);tl.rotation.z=-.25;
-    ball(skin,0,0,.02,.6,.58,.56,head);ball(hair,0,.14,-.1,.66,.6,.62,head);ball(hair,0,.44,.24,.48,.16,.26,head);
-    for(const s of[-1,1]){ball(hair,s*.5,-.14,-.02,.2,.42,.36,head);const bg=ball(hair,s*.32,.36,.4,.18,.12,.12,head,false);bg.rotation.z=s*.35;}
+    ball(skin,0,0,.02,.6,.58,.56,head);ball(hair,0,.16,-.1,.68,.62,.64,head);
+    const fr=ball(hair,-.1,.4,.3,.5,.2,.3,head);fr.rotation.z=.28;const fr2=ball(hair,.34,.34,.36,.22,.15,.2,head,false);fr2.rotation.z=-.5;const tip=ball(hair,-.44,.2,.42,.14,.2,.12,head,false);tip.rotation.z=.5;
+    for(const s of[-1,1]){ball(hair,s*.52,-.08,-.02,.2,.4,.38,head);const cu=ball(hair,s*.47,-.36,.12,.17,.16,.22,head);cu.rotation.z=-s*.5;}
+    ball(hair,0,-.2,-.42,.5,.3,.26,head);
     eyes(head,.24,0,.52,.125);ball(skin,0,-.15,.56,.05,.04,.04,head,false);smile(head,-.25,.53);blush(head,.4,-.17,.42);
     if(look.hat===1)hat(1,head,.62);else if(look.hat===3)hat(3,head,.62);else if(look.hat===2){const hc=mesh(rbox(.2,.06,.05,.02),Toy(0xffd447),.34,.34,.5,head,false);hc.rotation.z=-.4;}
   }
@@ -428,14 +430,14 @@ function critter(type,look){const g=new THREE.Group(),head=new THREE.Group();g.u
 
 /* =============== vehicles =============== */
 const TYPES=[
-  {name:'栗子',car:'刺猬 · 拖拉机',quote:'让开让开！',shot:0x9be85a,shotE:0x4fae3d},
-  {name:'土豆',car:'地鼠 · 矿车',quote:'等等，我螺丝呢？',shot:0xe8c88a,shotE:0xa8692f},
-  {name:'萝卜头',car:'兔子 · 皮卡',quote:'发型不能乱。',shot:0xff6a5a,shotE:0xc93a34},
+  {name:'栗子',car:'刺猬 · 拖拉机',quote:'让开让开！',lines:{dash:['让开让开！','我赶时间！','借过借过！'],kill:['下一个！','扎你哦！'],hurt:['谁扎的我？！','疼疼疼！'],lv:['刺又硬了一点']},shot:0x9be85a,shotE:0x4fae3d},
+  {name:'土豆',car:'地鼠 · 矿车',quote:'等等，我螺丝呢？',lines:{dash:['等等，我螺丝呢？','刹车好像没装…','这是特性不是故障'],kill:['意外，纯属意外','我只是路过'],hurt:['又掉零件了！','先挖个洞躲躲'],lv:['升级完成，大概吧']},shot:0xe8c88a,shotE:0xa8692f},
+  {name:'萝卜头',car:'兔子 · 皮卡',quote:'发型不能乱。',lines:{dash:['发型不能乱。','油门焊死！','看我漂移'],kill:['帅不帅？','记得给我点赞'],hurt:['别打脸！','我的耳朵！'],lv:['又帅了一级']},shot:0xff6a5a,shotE:0xc93a34},
   {name:'鹈鹕小偷',car:'自行车',shot:0xa9d8ff,shotE:0x4a90c8,hpM:.78,spM:1.18,thief:true},
   {name:'浣熊强盗',car:'购物车',shot:0xb8573a,shotE:0x6a7a2a,rgM:1.18},
   {name:'野猪小弟',car:'木桶车',shot:0xb9824a,shotE:0x6e4a2e,hpM:1.3,spM:.9},
-  {name:'皮衣爷爷',car:'老爷爷 · 显卡车 1060',quote:'算力就是马力！',shot:0x8dffb0,shotE:0x1fc060},
-  {name:'豆包',car:'女生 · 蒸笼车',quote:'热乎的，小心烫！',shot:0xc2504a,shotE:0x7a2420}];
+  {name:'皮衣爷爷',car:'老爷爷 · 显卡车 1060',quote:'算力就是马力！',lines:{dash:['算力就是马力！','风扇拉满！','买得越多，省得越多'],kill:['这就是性能','帧数稳了'],hurt:['散热！散热！','显卡在燃烧…'],lv:['新一代，更强了']},shot:0x8dffb0,shotE:0x1fc060},
+  {name:'豆包',car:'女生 · 蒸笼车',quote:'我用最不绕弯子的方式告诉你…',lines:{dash:['我用最不绕弯子的方式告诉你…','让我直接说重点','马上为你安排'],kill:['…你被赶跑了','答案是：我赢了'],hurt:['这个问题有点难…','让我想一想'],lv:['已为你升级完成','这个问题问得好']},shot:0xc2504a,shotE:0x7a2420}];
 function wheel(parent,x,y,z,R,w,hubMat,list,lugs=0){const g=new THREE.Group();g.userData.dyn=true;g.position.set(x,y,z);const tr=w/2,t=torus(M(0x4a4038,{roughness:.95}),0,0,0,R-tr,tr,g);t.rotation.y=Math.PI/2;
   const d=tube(M(0x3d342e),0,0,0,R-tr,R-tr,w*.7,g);d.rotation.z=Math.PI/2;ball(hubMat,0,0,0,w*.62,(R-tr)*.62,(R-tr)*.62,g);
   for(let i=0;i<3;i++){const a=i/3*6.28;ball(M(0x4a4038),Math.sign(x)*w*.55,Math.sin(a)*(R-tr)*.34,Math.cos(a)*(R-tr)*.34,.04,.05,.05,g,false);}
@@ -660,7 +662,7 @@ function applyUp(v,k){if((k==='cl'||k==='cr')&&v.isPlayer&&v.cl+v.cr===0)showBan
 function availUps(v){return UPS.filter(u=>upVal(v,u.k)<u.max);}
 function aiPick(v){if(v.cl+v.cr===0){applyUp(v,rnd()<.5?'cl':'cr');return;}const a=availUps(v);if(a.length)applyUp(v,a[Math.floor(rnd(a.length))].k);}
 function levelUp(v){v.lv++;v.scale=scaleOf(v.lv);v.hp=Math.min(stats(v).maxhp,v.hp+20);
-  if(v.isPlayer){pending++;SFX.level();floatAt('升级！Lv.'+v.lv,v.x,4.4*v.scale,v.z,'big');puff(v.x,1.5,v.z,0xffe45c,14,5,1);ringFx(v.x,v.z,0xffe45c,7*v.scale,.6);ringFx(v.x,v.z,0xffffff,4*v.scale,.4);if(EVO.includes(v.lv)){showBanner('进化！'+(EVO_NAMES[v.type][EVO.indexOf(v.lv)]||''),2.2);puff(v.x,2,v.z,0xffffff,16,7,1.3);ringFx(v.x,v.z,0xffb347,12*v.scale,.9);}}
+  if(v.isPlayer){pending++;SFX.level();say(v,'lv',.5);floatAt('升级！Lv.'+v.lv,v.x,4.4*v.scale,v.z,'big');puff(v.x,1.5,v.z,0xffe45c,14,5,1);ringFx(v.x,v.z,0xffe45c,7*v.scale,.6);ringFx(v.x,v.z,0xffffff,4*v.scale,.4);if(EVO.includes(v.lv)){showBanner('进化！'+(EVO_NAMES[v.type][EVO.indexOf(v.lv)]||''),2.2);puff(v.x,2,v.z,0xffffff,16,7,1.3);ringFx(v.x,v.z,0xffb347,12*v.scale,.9);}}
   else aiPick(v);}
 function gainXp(v,n){v.carrots+=n;v.hp=Math.min(stats(v).maxhp,v.hp+1.5*n);if(v.lv>=MAXLV){v.hp=Math.min(stats(v).maxhp,v.hp+2*n);return;}v.xp+=n;while(v.lv<MAXLV&&v.xp>=needXp(v.lv)){v.xp-=needXp(v.lv);levelUp(v);}if(v.lv>=MAXLV)v.xp=0;}
 function setLevel(v,lv){while(v.lv<lv){v.lv++;aiPick(v);}v.scale=v.vscale=scaleOf(v.lv);v.hp=stats(v).maxhp;}
@@ -690,6 +692,7 @@ function ringFx(x,z,color=0xffffff,R=6,life=.5){const m=new THREE.Mesh(ringGeo,n
 let won=false,lastHurt=-9,fovKick=0,baseFov=38,duskG=0,streak=0,streakT=0,pickC=0,pickT=0,lastTick=99;
 function floatAt(txt,x,y,z,cls=''){tmp.set(x,y,z).project(camera);if(Math.abs(tmp.x)>1.05||Math.abs(tmp.y)>1.05||tmp.z>1)return;const d=document.createElement('div');d.className='float '+cls;d.textContent=txt;d.style.left=(tmp.x*.5+.5)*innerWidth+'px';d.style.top=(-tmp.y*.5+.5)*innerHeight+'px';$('world').appendChild(d);setTimeout(()=>d.remove(),820);}
 let bannerT=0;function showBanner(t,dur=2.2){$('banner').textContent=t;$('banner').classList.add('on');bannerT=dur;}
+function say(v,kind,chance=1,d=1.6){const L=TYPES[v.type].lines;if(!L||!L[kind]||rnd()>chance)return;emote(v,L[kind][Math.floor(rnd(L[kind].length))],d);}
 function emote(v,t,d=1.4){if(!v.alive)return;v.emoT=d;const b=v.tag.children[2];b.textContent=t;b.classList.add('on');}
 const near=(x,z,r=26)=>player&&Math.hypot(x-player.x,z-player.z)<r*camF;
 
@@ -699,7 +702,7 @@ function fireSide(v,s,target,st){const n=s>0?v.cl:v.cr,a0=Math.atan2(target.x-v.
     const aa=a+(n>1?(i-(n-1)/2)*.05:0);shots.push({m,vx:Math.sin(aa)*st.pspeed,vz:Math.cos(aa)*st.pspeed,t:0,life:st.range/st.pspeed,dmg:st.dmg,owner:v,r});if(near(x,z))puff(x,y,z,T.shot,2,1.5,.5);}
   v.recoil=1;if(v.isPlayer)SFX.shoot();else if(near(v.x,v.z,18))SFX.far();}
 function damage(v,amt,from,dx,dz){if(!v.alive||state!=='play'||(won&&v.isPlayer))return;if(v.isPlayer)amt*=(from===boss?.8:.6)*Math.min(1.7,1+.1*(day-1));amt=Math.round(amt);v.hp-=amt;v.hitT=.2;const k=2.2/v.scale;v.kx+=dx*k;v.kz+=dz*k;
-  if(v.isPlayer){floatAt('-'+amt,v.x,3.2*v.scale,v.z,'me');SFX.hurt();if(amt>=14&&simT-lastHurt>1.2){lastHurt=simT;emote(v,'好痛！',1);$('hurt').style.opacity=.55;setTimeout(()=>$('hurt').style.opacity=0,160);}}
+  if(v.isPlayer){floatAt('-'+amt,v.x,3.2*v.scale,v.z,'me');SFX.hurt();if(amt>=14&&simT-lastHurt>1.2){lastHurt=simT;say(v,'hurt',1,1.3);$('hurt').style.opacity=.55;setTimeout(()=>$('hurt').style.opacity=0,160);}}
   else if(from===player&&near(v.x,v.z)){floatAt('-'+amt,v.x,3*v.scale,v.z);{SFX.hit();if(rnd()<.12)emote(v,['哎哟','别打啦','疼疼疼'][Math.floor(rnd(3))],1);}}
   if(!v.isPlayer&&from&&from.alive!==false&&v.ai.mode!=='flee'&&from!==boss){if(v.ai.mode!=='fight')v.ai.fightT=rnd(7,12);v.ai.target=from;v.ai.mode='fight';}
   if(v.hp<=0)knockOut(v,from);}
@@ -707,7 +710,7 @@ function knockOut(v,from){v.alive=false;v.koT=.75;v.tag.style.display='none';puf
   if(v.isPlayer){SFX.ko();freeze=.3;shake=.4;setTimeout(()=>endGame(false),900);return;}
   for(let k=0,n=Math.min(24,4+v.lv*3);k<n&&carrots.length<150;k++)spawnCarrot(v.x,v.z,true);if(hearts.length<6&&rnd()<.4)spawnHeart(v.x+rnd(-1.5,1.5),v.z+rnd(-1.5,1.5));v.respawn=rnd(4,7);
   if(from&&from!==boss)from.kills++;
-  if(from===player){SFX.ko();floatAt('赶跑啦！',v.x,3.6*v.scale,v.z,'big');ringFx(v.x,v.z,0xffffff,8*v.scale,.5);emote(player,'耶！',1.2);streak=streakT>0?streak+1:1;streakT=7;if(streak>=2){showBanner(['','','二连赶！','三连赶！','四连赶！','势不可挡！'][Math.min(5,streak)],1.6);for(let i=0;i<Math.min(5,streak);i++)tone(600*Math.pow(1.19,i),600*Math.pow(1.19,i),.1,'triangle',.07,i*.07);}}}
+  if(from===player){SFX.ko();floatAt('赶跑啦！',v.x,3.6*v.scale,v.z,'big');ringFx(v.x,v.z,0xffffff,8*v.scale,.5);say(player,'kill',1);streak=streakT>0?streak+1:1;streakT=7;if(streak>=2){showBanner(['','','二连赶！','三连赶！','四连赶！','势不可挡！'][Math.min(5,streak)],1.6);for(let i=0;i<Math.min(5,streak);i++)tone(600*Math.pow(1.19,i),600*Math.pow(1.19,i),.1,'triangle',.07,i*.07);}}}
 function respawn(v){const[x,z]=freeSpot(24);v.x=x;v.z=z;v.h=rnd(6.28);v.v=0;v.kx=v.kz=0;v.lv=1;v.xp=0;v.cl=v.cr=0;for(const k in v.up)v.up[k]=0;setLevel(v,clamp(player.lv+Math.floor(rnd(-2,2.4)),1,MAXLV));v.alive=true;v.koT=0;v.bleed=0;v.fwT=0;v.vis.root.rotation.set(0,v.h,0);v.vis.root.visible=true;v.tag.style.display='flex';v.ai.mode='forage';v.ai.target=null;}
 
 /* driving shared by player and AI */
@@ -717,7 +720,7 @@ function drive(v,want,thr,dt){const st=stats(v),mud=inMud(v.x,v.z),corn=inCorn(v
   v.dashT=Math.max(0,v.dashT-dt);const maxV=(v.dashT>0?st.speed*2.2:st.speed)*(mud?.55:1)*(corn?.82:1),tv=v.dashT>0?maxV:maxV*thr;
   v.v+=(tv-v.v)*Math.min(1,dt*(tv>v.v?5:3));v.x+=(Math.sin(v.h)*v.v+v.kx)*dt;v.z+=(Math.cos(v.h)*v.v+v.kz)*dt;const f=1-Math.min(1,dt*6);v.kx*=f;v.kz*=f;
   collide(v,1.3*v.scale);v.energy=Math.min(100,v.energy+st.regen*dt);v.turn=turn;v.mud=mud;v.corn=corn;}
-function tryDash(v){if(v.energy>=35&&v.dashT<=0){v.energy-=35;v.dashT=.38;if(near(v.x,v.z))puff(v.x,.6,v.z,0xffffff,4,3,.9*v.scale);if(v.isPlayer){if(TYPES[v.type].quote&&rnd()<.15)emote(v,TYPES[v.type].quote,1.2);SFX.dash();}return true;}return false;}
+function tryDash(v){if(v.energy>=35&&v.dashT<=0){v.energy-=35;v.dashT=.38;if(near(v.x,v.z))puff(v.x,.6,v.z,0xffffff,4,3,.9*v.scale);if(v.isPlayer){say(v,'dash',.3);SFX.dash();}return true;}return false;}
 
 /* AI */
 function attackersOn(t,self){let n=0;for(const o of vehicles)if(o!==self&&o.alive&&!o.isPlayer&&o.ai.mode==='fight'&&o.ai.target===t)n++;return n;}
@@ -859,8 +862,10 @@ let lastRun=0;
 /* online board: Supabase project URL and publishable key (safe to ship; the table only allows read and insert). Empty = device-only board */
 const SUPA={url:'https://vgrezkejedzbfqkavhib.supabase.co',key:'sb_publishable_Gq7-YtsA6Mgm_jy5lOnzPA_JU-CT2aX'};
 const supaHead=()=>({apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json'});
-async function pushScore(run){if(!SUPA.url)return false;try{const r=await fetch(SUPA.url+'/rest/v1/scores',{method:'POST',headers:{...supaHead(),Prefer:'return=minimal'},body:JSON.stringify({name:run.n,score:run.s,lv:run.lv,win:!!run.w,hero:run.t})});return r.ok;}catch(e){return false;}}
-async function fetchTop(){if(!SUPA.url)return null;try{const r=await fetch(SUPA.url+'/rest/v1/scores?select=name,score,lv,win&order=score.desc&limit=30',{headers:supaHead()});return r.ok?await r.json():null;}catch(e){return null;}}
+/* fetch with a timeout, so a blocked or slow network fails fast instead of hanging */
+function tfetch(url,opt={},ms=9000){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);return fetch(url,{...opt,signal:c.signal}).finally(()=>clearTimeout(t));}
+async function pushScore(run){if(!SUPA.url)return false;try{const r=await tfetch(SUPA.url+'/rest/v1/scores',{method:'POST',headers:{...supaHead(),Prefer:'return=minimal'},body:JSON.stringify({name:run.n,score:run.s,lv:run.lv,win:!!run.w,hero:run.t})});return r.ok;}catch(e){return false;}}
+async function fetchTop(){if(!SUPA.url)return null;for(let i=0;i<2;i++){try{const r=await tfetch(SUPA.url+'/rest/v1/scores?select=name,score,lv,win&order=score.desc&limit=30',{headers:supaHead()},6000);if(r.ok)return await r.json();}catch(e){}await new Promise(r=>setTimeout(r,700));}return null;}
 if(!LS.get('farmBattle.name',''))LS.set('farmBattle.name','小菜农'+(1000+ri(9000)));
 const myName=()=>(LS.get('farmBattle.name','')||'小菜农');
 function calcScore(){return Math.min(60000,player.lv*100+player.kills*60+player.carrots*2+bossKills*2000);}
@@ -875,13 +880,13 @@ function renderBoard(rows,msg,mine){const loc=LS.get('farmBattle.board.v1',[]),l
   if(!all.length){const d=document.createElement('div');d.className='sub';d.style.margin='10px 0';d.textContent=msg||'';box.appendChild(d);}
   boardScroll();}
 function boardScroll(){const box=$('blist'),nw=box.querySelector('.new');if(nw)box.scrollTop=Math.max(0,nw.offsetTop-box.offsetTop-box.clientHeight/2+nw.offsetHeight/2);else box.scrollTop=0;}
-async function fetchRank(score){try{const r=await fetch(SUPA.url+'/rest/v1/scores?select=id&score=gt.'+score+'&limit=1',{headers:{...supaHead(),Prefer:'count=exact'}});const cr=r.headers.get('content-range'),n=cr?parseInt(cr.split('/')[1],10):NaN;return isNaN(n)?null:n+1;}catch(e){return null;}}
+async function fetchRank(score){try{const r=await tfetch(SUPA.url+'/rest/v1/scores?select=id&score=gt.'+score+'&limit=1',{headers:{...supaHead(),Prefer:'count=exact'}});const cr=r.headers.get('content-range'),n=cr?parseInt(cr.split('/')[1],10):NaN;return isNaN(n)?null:n+1;}catch(e){return null;}}
 let boardBusy=false;
 /* uploads every confirmed run that has not reached the server yet (so a failed upload is retried next time), then loads the top list */
 async function syncBoard(){$('bnote').textContent='';renderBoard(null,'正在读取总榜…');let failed=false;const pend=LS.get('farmBattle.board.v1',[]).filter(r=>r.c&&!r.up);
   for(const r of pend){const ok=await pushScore(r);if(ok){const b=LS.get('farmBattle.board.v1',[]);for(const q of b)if(q.d===r.d)q.up=1;LS.set('farmBattle.board.v1',b);}else failed=true;}
   const rows=await fetchTop(),tail=failed?'成绩还没传上去，下次打开榜单会自动重试':'';
-  if(!rows){renderBoard(null,'总榜暂时连不上，请稍后再试');$('bnote').textContent=tail;return;}
+  if(!rows){renderBoard(null,'总榜暂时连不上。成绩已存在这台设备上，网络恢复后打开榜单会自动补传。');$('bnote').textContent=tail;return;}
   const lr=LS.get('farmBattle.board.v1',[]).find(r=>r.d===lastRun),mine=lr&&lr.up?await fetchRank(lr.s):null;
   renderBoard(rows,'还没有人上榜，打一局来当第一名！',mine);$('bnote').textContent='所有玩家的成绩 · 前 30 名'+(mine?' · 你这局排第 '+mine+' 名':'')+(tail?' · '+tail:'');boardScroll();}
 function openBoard(){$('boardAgain').style.display=state==='over'?'':'none';$('board').classList.add('on');if(!boardBusy){boardBusy=true;syncBoard().finally(()=>{boardBusy=false;});}}
@@ -1033,7 +1038,7 @@ HEROES.forEach((t,i)=>{const T=TYPES[t];const d=document.createElement('div');d.
   d.addEventListener('click',()=>{unlockAudio();sel=t;it.pop=1;PV.items.forEach((o,k)=>o.d.classList.toggle('sel',k===i));const go=$('go');go.classList.remove('off');go.textContent='开始游戏';tone(700,1000,.1,'triangle',.06);});$('cards').appendChild(d);});
 $('reroll').addEventListener('click',()=>{unlockAudio();HEROES.forEach((t,i)=>{looks[t]=randLook(t);pvBuild(i);});tone(500,900,.12,'triangle',.06);});
 $('go').addEventListener('click',()=>{if(sel>=0&&state==='menu')startGame(sel);});
-const DEX=[[0,'主角','','急性子，一着急刺就炸起来。5 级装上推土铲，正面撞人一下一下掉血。「让开让开！」'],[1,'主角','','慢吞吞的发明家。5 级装上钻头，贴住对手让它持续掉血。「等等，我螺丝呢？」'],[2,'主角','','爱臭美的飙车手。5 级装上防撞杠，冲刺撞到谁谁飞。「发型不能乱。」'],[6,'主角','','隔壁搬来的老爷爷，一年四季穿皮衣。把旧显卡改成了车，从 1060 一路升级到 5090，5 级起风扇会把正前方的对手吹走。「算力就是马力！」'],[7,'主角','','短发、红围巾、黑 T 恤的大眼睛女生，推着蒸笼车来帮忙。5 级起会喷蒸汽，烫伤并推开前面的对手。「热乎的，小心烫！」'],
+const DEX=[[0,'主角','','急性子，一着急刺就炸起来。5 级装上推土铲，正面撞人一下一下掉血。「让开让开！」'],[1,'主角','','慢吞吞的发明家。5 级装上钻头，贴住对手让它持续掉血。「等等，我螺丝呢？」'],[2,'主角','','爱臭美的飙车手。5 级装上防撞杠，冲刺撞到谁谁飞。「发型不能乱。」'],[6,'主角','','隔壁搬来的老爷爷，一年四季穿皮衣。把旧显卡改成了车，从 1060 一路升级到 5090，5 级起风扇会把正前方的对手吹走。「算力就是马力！」'],[7,'主角','','短发、红围巾、黑 T 恤的大眼睛女生，推着蒸笼车来帮忙。5 级起会喷蒸汽，烫伤并推开前面的对手。「我用最不绕弯子的方式告诉你…」'],
   [3,'捣蛋鬼','bad','骑着自行车来偷菜，嘴里能装下半个农场。跑得快，不经打，挨两下就溜。'],[4,'捣蛋鬼','bad','推着超市购物车，专扔烂番茄，射程比别人远。它管那叫「陈年佳酿」。'],[5,'捣蛋鬼','bad','头上顶着偷来的锅，皮厚、跑得慢，认准了就横冲直撞。'],
   [-1,'头目','boss','大野猪老大，贪吃。挨打挨急了会叫来三只小猪帮忙。'],[-2,'头目','boss','上半身鲨鱼、下半身蜜蜂，飞得快，会俯冲，还会甩出一圈毒针。'],[-3,'头目','boss','骑着火箭到处收购农场，不卖就扔炸弹。看到地上的红圈赶紧躲开。']];
 let dexBuilt=false;
