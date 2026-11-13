@@ -862,10 +862,20 @@ let lastRun=0;
 /* online board: Supabase project URL and publishable key (safe to ship; the table only allows read and insert). Empty = device-only board */
 const SUPA={url:'https://vgrezkejedzbfqkavhib.supabase.co',key:'sb_publishable_Gq7-YtsA6Mgm_jy5lOnzPA_JU-CT2aX'};
 const supaHead=()=>({apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json'});
+/* Tencent CloudBase (reachable from mainland China). Set env to switch the leaderboard over; while it is empty the Supabase settings above are used. */
+const TCB={env:'',region:'ap-shanghai',key:''};
+let tcbP=null;
+const within=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+function tcbDb(){if(!tcbP)tcbP=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://static.cloudbase.net/cloudbase-js-sdk/2.28.6/cloudbase.full.js';
+    sc.onload=async()=>{try{const app=window.cloudbase.init(TCB.key?{env:TCB.env,region:TCB.region,accessKey:TCB.key}:{env:TCB.env,region:TCB.region});if(!TCB.key)await app.auth.signInAnonymously();res(app.database());}catch(e){rej(e);}};
+    sc.onerror=()=>rej(new Error('sdk'));document.head.appendChild(sc);}).catch(e=>{tcbP=null;throw e;});return tcbP;}
+async function tcbPush(run){try{const db=await within(tcbDb(),9000);const r=await within(db.collection('scores').add({name:run.n,score:run.s,lv:run.lv,win:!!run.w,hero:run.t,created_at:Date.now()}),9000);return !!r&&!r.code;}catch(e){return false;}}
+async function tcbTop(){for(let i=0;i<2;i++){try{const db=await within(tcbDb(),8000);const r=await within(db.collection('scores').orderBy('score','desc').limit(30).get(),8000);if(r&&Array.isArray(r.data))return r.data.map(d=>({name:d.name,score:d.score,lv:d.lv,win:d.win}));}catch(e){}await new Promise(r=>setTimeout(r,700));}return null;}
+async function tcbRank(score){try{const db=await within(tcbDb(),8000);const r=await within(db.collection('scores').where({score:db.command.gt(score)}).count(),8000);return r&&typeof r.total==='number'?r.total+1:null;}catch(e){return null;}}
 /* fetch with a timeout, so a blocked or slow network fails fast instead of hanging */
 function tfetch(url,opt={},ms=9000){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);return fetch(url,{...opt,signal:c.signal}).finally(()=>clearTimeout(t));}
-async function pushScore(run){if(!SUPA.url)return false;try{const r=await tfetch(SUPA.url+'/rest/v1/scores',{method:'POST',headers:{...supaHead(),Prefer:'return=minimal'},body:JSON.stringify({name:run.n,score:run.s,lv:run.lv,win:!!run.w,hero:run.t})});return r.ok;}catch(e){return false;}}
-async function fetchTop(){if(!SUPA.url)return null;for(let i=0;i<2;i++){try{const r=await tfetch(SUPA.url+'/rest/v1/scores?select=name,score,lv,win&order=score.desc&limit=30',{headers:supaHead()},6000);if(r.ok)return await r.json();}catch(e){}await new Promise(r=>setTimeout(r,700));}return null;}
+async function pushScore(run){if(TCB.env)return tcbPush(run);if(!SUPA.url)return false;try{const r=await tfetch(SUPA.url+'/rest/v1/scores',{method:'POST',headers:{...supaHead(),Prefer:'return=minimal'},body:JSON.stringify({name:run.n,score:run.s,lv:run.lv,win:!!run.w,hero:run.t})});return r.ok;}catch(e){return false;}}
+async function fetchTop(){if(TCB.env)return tcbTop();if(!SUPA.url)return null;for(let i=0;i<2;i++){try{const r=await tfetch(SUPA.url+'/rest/v1/scores?select=name,score,lv,win&order=score.desc&limit=30',{headers:supaHead()},6000);if(r.ok)return await r.json();}catch(e){}await new Promise(r=>setTimeout(r,700));}return null;}
 if(!LS.get('farmBattle.name',''))LS.set('farmBattle.name','小菜农'+(1000+ri(9000)));
 const myName=()=>(LS.get('farmBattle.name','')||'小菜农');
 function calcScore(){return Math.min(60000,player.lv*100+player.kills*60+player.carrots*2+bossKills*2000);}
@@ -880,7 +890,7 @@ function renderBoard(rows,msg,mine){const loc=LS.get('farmBattle.board.v1',[]),l
   if(!all.length){const d=document.createElement('div');d.className='sub';d.style.margin='10px 0';d.textContent=msg||'';box.appendChild(d);}
   boardScroll();}
 function boardScroll(){const box=$('blist'),nw=box.querySelector('.new');if(nw)box.scrollTop=Math.max(0,nw.offsetTop-box.offsetTop-box.clientHeight/2+nw.offsetHeight/2);else box.scrollTop=0;}
-async function fetchRank(score){try{const r=await tfetch(SUPA.url+'/rest/v1/scores?select=id&score=gt.'+score+'&limit=1',{headers:{...supaHead(),Prefer:'count=exact'}});const cr=r.headers.get('content-range'),n=cr?parseInt(cr.split('/')[1],10):NaN;return isNaN(n)?null:n+1;}catch(e){return null;}}
+async function fetchRank(score){if(TCB.env)return tcbRank(score);try{const r=await tfetch(SUPA.url+'/rest/v1/scores?select=id&score=gt.'+score+'&limit=1',{headers:{...supaHead(),Prefer:'count=exact'}});const cr=r.headers.get('content-range'),n=cr?parseInt(cr.split('/')[1],10):NaN;return isNaN(n)?null:n+1;}catch(e){return null;}}
 let boardBusy=false;
 /* uploads every confirmed run that has not reached the server yet (so a failed upload is retried next time), then loads the top list */
 async function syncBoard(){$('bnote').textContent='';renderBoard(null,'正在读取总榜…');let failed=false;const pend=LS.get('farmBattle.board.v1',[]).filter(r=>r.c&&!r.up);
