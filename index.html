@@ -515,7 +515,7 @@ function buildVehicle(type,look=defaultLook(type)){const pal=PAINT[type][look.pa
 
 
 /* per-vehicle evolution parts: t2 from lv4, t2a lv4-9 (replaced by gold at max), t3 from lv7, t4 at max */
-const EVO_NAMES=[['加固拖拉机','丰收拖车','黄金拖拉机'],['钻头矿车','矿石列车','黄金钻头'],['越野皮卡','萝卜火箭','黄金火箭'],[],[],[],['老爷 3090 · 三风扇','老爷 4080 · 水冷加烫手电源线','老爷 5090 · 自带发电站']];
+const EVO_NAMES=[['推土铲解锁 · 正面撞上去','丰收拖车','黄金拖拉机'],['钻头解锁 · 贴住对手持续掉血','矿石列车','黄金钻头'],['防撞杠解锁 · 冲刺撞击','萝卜火箭','黄金火箭'],[],[],[],['老爷 3090 · 风扇会把前方对手吹走','老爷 4080 · 水冷加烫手电源线','老爷 5090 · 自带发电站']];
 function flagGeo(){return cg('flag',()=>{const fs=new THREE.Shape();fs.moveTo(0,.3);fs.quadraticCurveTo(.5,.36,1.0,.02);fs.quadraticCurveTo(.5,-.3,0,-.3);fs.lineTo(0,.3);return new THREE.ExtrudeGeometry(fs,{depth:.04,bevelEnabled:false,curveSegments:12});});}
 function evo(type,body,wheels,pal){const t2=new THREE.Group(),t2a=new THREE.Group(),t3=new THREE.Group(),t4=new THREE.Group();body.add(t2,t2a,t3,t4);for(const q of[t2,t2a,t3,t4])q.userData.dyn=true;const spin=[],rockets=[];let flag=null,labels=null,smoke=null,steam=null;
   const gold=Toy(0xffc928),goldD=Toy(0xf2a800),metal=M(0x8fa3b8,{metalness:.35,roughness:.45}),dark=M(0x4a4038),wood=Toy(type===1?pal[0]:0xc98d4a),woodD=Toy(type===1?pal[1]:0xa8692f);
@@ -617,6 +617,7 @@ $('mute').addEventListener('pointerdown',e=>{e.stopPropagation();muted=!muted;$(
 const MAXLV=256,EVO=[5,12,25];
 let state='menu',phase='day',timeLeft=+(Q.get('time')||120),simT=0,playT=0,freeze=0,shake=0,nightK=0,camF=1,pending=0;
 let player=null,boss=null,nightT=0,introT=0;const vehicles=[],carrots=[],shots=[],puffs=[];
+const FRONT={0:'shovel',1:'drill',2:'ram',5:'shovel',6:'wind'};
 const needXp=lv=>Math.min(30,4+Math.floor(lv*.8));
 const scaleOf=lv=>1+1.2*(1-Math.exp(-(Math.min(lv,MAXLV)-1)/14));
 function stats(v){const u=v.up,T=TYPES[v.type],hm=T.hpM||1,sm=T.spM||1,rm=T.rgM||1;return{maxhp:(60+(v.lv-1)*8+u.hp*30)*hm,dmg:12*(1+.2*u.dmg)*(1+.025*(v.lv-1)),fire:.7*Math.pow(.92,u.rate),pspeed:20*(1+.1*u.range),range:(11+1.6*u.range)*(.8+.2*v.scale)*rm,speed:8.5*(1+.07*u.speed)*sm,regen:18*(1+.3*u.energy),magnet:4.2*(1+.3*u.magnet)*Math.sqrt(v.scale)};}
@@ -678,7 +679,7 @@ function knockOut(v,from){v.alive=false;v.koT=.75;v.tag.style.display='none';puf
   for(let k=0,n=Math.min(24,4+v.lv*3);k<n&&carrots.length<150;k++)spawnCarrot(v.x,v.z,true);if(hearts.length<6&&rnd()<.4)spawnHeart(v.x+rnd(-1.5,1.5),v.z+rnd(-1.5,1.5));v.respawn=rnd(4,7);
   if(from&&from!==boss)from.kills++;
   if(from===player){SFX.ko();floatAt('赶跑啦！',v.x,3.6*v.scale,v.z,'big');ringFx(v.x,v.z,0xffffff,8*v.scale,.5);emote(player,'耶！',1.2);streak=streakT>0?streak+1:1;streakT=7;if(streak>=2){showBanner(['','','二连赶！','三连赶！','四连赶！','势不可挡！'][Math.min(5,streak)],1.6);for(let i=0;i<Math.min(5,streak);i++)tone(600*Math.pow(1.19,i),600*Math.pow(1.19,i),.1,'triangle',.07,i*.07);}}}
-function respawn(v){const[x,z]=freeSpot(24);v.x=x;v.z=z;v.h=rnd(6.28);v.v=0;v.kx=v.kz=0;v.lv=1;v.xp=0;v.cl=v.cr=0;for(const k in v.up)v.up[k]=0;setLevel(v,clamp(player.lv+Math.floor(rnd(-4,1.2)),1,MAXLV));v.alive=true;v.koT=0;v.vis.root.rotation.set(0,v.h,0);v.vis.root.visible=true;v.tag.style.display='flex';v.ai.mode='forage';v.ai.target=null;}
+function respawn(v){const[x,z]=freeSpot(24);v.x=x;v.z=z;v.h=rnd(6.28);v.v=0;v.kx=v.kz=0;v.lv=1;v.xp=0;v.cl=v.cr=0;for(const k in v.up)v.up[k]=0;setLevel(v,clamp(player.lv+Math.floor(rnd(-4,1.2)),1,MAXLV));v.alive=true;v.koT=0;v.bleed=0;v.fwT=0;v.vis.root.rotation.set(0,v.h,0);v.vis.root.visible=true;v.tag.style.display='flex';v.ai.mode='forage';v.ai.target=null;}
 
 /* driving shared by player and AI */
 function collide(o,r){for(const s of solids){const dx=o.x-s.x,dz=o.z-s.z,d=Math.hypot(dx,dz),min=s.r+r;if(d<min&&d>0){o.x=s.x+dx/d*min;o.z=s.z+dz/d*min;}}const L=HALF-.6-r;o.x=clamp(o.x,-L,L);o.z=clamp(o.z,-L,L);}
@@ -740,6 +741,8 @@ function bossUpdate(dt){const B=boss;if(!B.alive)return;const dx=player.x-B.x,dz
   if(d<B.R+1.3*player.scale&&B.state!=='charge'){const k=1/Math.max(d,.1);player.x=B.x+dx*k*(B.R+1.3*player.scale);player.z=B.z+dz*k*(B.R+1.3*player.scale);collide(player,1.3*player.scale);if(B.touch<=0){damage(player,8,boss,dx*k*5,dz*k*5);B.touch=1;}}
   B.g.position.set(B.x,0,B.z);B.g.rotation.y=B.h;const sq=B.hitT>0?1+Math.sin(B.hitT/.15*Math.PI)*.06:1;B.b.scale.set(sq,2-sq,sq);if(B.state==='walk')B.b.position.y=Math.abs(Math.sin(simT*6))*.18;B.b.rotation.z=B.state==='walk'?Math.sin(simT*6)*.04:0;
   $('bossbar').firstChild.style.width=Math.max(0,B.hp/B.max*100)+'%';}
+function hitBoss(dmg,x,z){if(!boss.alive)return;boss.hp-=dmg;boss.hitT=.15;floatAt('-'+Math.round(dmg),x,4.5,z);SFX.hit();
+  if(boss.hp<=0){boss.alive=false;won=true;for(const q of shots)if(q.owner===boss)q.life=0;boss.g.visible=false;$('rage').classList.remove('on');boss.strip.visible=boss.ring.visible=false;puff(boss.x,2,boss.z,0xffffff,30,9,2.4);puff(boss.x,2,boss.z,0xffe45c,16,7,1.6);for(let k=0;k<30;k++)spawnCarrot(boss.x,boss.z,true);freeze=.2;shake=.4;SFX.ko();showBanner('拱拱被赶跑啦！',2.4);setTimeout(()=>endGame(true),2400);}}
 function startNight(){if(phase!=='day')return;phase='night';timeLeft=0;showBanner('天黑了，捣蛋鬼们溜走了…',2.4);boss.g.visible=false;
   for(const v of vehicles)if(!v.isPlayer){if(v.alive)puff(v.x,1.2,v.z,0xffffff,8,4,1.2);v.alive=false;v.koT=0;v.vis.root.visible=false;v.tag.style.display='none';v.respawn=1e9;}
   nightT=0;}
@@ -776,8 +779,8 @@ $('again').addEventListener('click',()=>location.reload());
 /* ---- overall leaderboard (saved on this device; farm residents are fixed benchmark entries) ---- */
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
 let lastRun=0;
-/* online board: fill in the Supabase project URL and publishable (anon) key to enable it; empty = device-only board */
-const SUPA={url:'',key:''};
+/* online board: Supabase project URL and publishable key (safe to ship; the table only allows read and insert). Empty = device-only board */
+const SUPA={url:'https://vgrezkejedzbfqkavhib.supabase.co',key:'sb_publishable_Gq7-YtsA6Mgm_jy5lOnzPA_JU-CT2aX'};
 const supaHead=()=>({apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json'});
 async function pushScore(run){if(!SUPA.url)return false;try{const r=await fetch(SUPA.url+'/rest/v1/scores',{method:'POST',headers:{...supaHead(),Prefer:'return=minimal'},body:JSON.stringify({name:run.n,score:run.s,lv:run.lv,win:!!run.w,hero:run.t})});return r.ok;}catch(e){return false;}}
 async function fetchTop(){if(!SUPA.url)return null;try{const r=await fetch(SUPA.url+'/rest/v1/scores?select=name,score,lv,win&order=score.desc&limit=30',{headers:supaHead()});return r.ok?await r.json():null;}catch(e){return null;}}
@@ -795,7 +798,7 @@ function renderBoard(online){const mine=LS.get('farmBattle.board.v1',[]).slice(0
 function openBoard(){renderBoard();$('boardAgain').style.display=state==='over'?'':'none';$('board').classList.add('on');
   if(SUPA.url){$('bnote').textContent='正在读取总榜…';fetchTop().then(rows=>{if(rows){renderBoard(rows);$('bnote').textContent='所有玩家的成绩 · 前 30 名';}else $('bnote').textContent='总榜暂时连不上，先显示这台设备上的成绩';});}else $('bnote').textContent='这台设备上的成绩';}
 $('boardBtn').addEventListener('click',()=>{unlockAudio();openBoard();});$('boardX').addEventListener('click',()=>$('board').classList.remove('on'));$('boardAgain').addEventListener('click',()=>location.reload());
-function confirmName(){const v=$('bname').value.trim().slice(0,8)||myName();LS.set('farmBattle.name',v);const a=LS.get('farmBattle.board.v1',[]);let run=null;for(const r of a)if(r.d===lastRun){r.n=v;run=r;}const send=run&&SUPA.url&&!run.up;if(send)run.up=1;LS.set('farmBattle.board.v1',a);$('endName').style.display='none';if(send)pushScore(run).then(openBoard);else openBoard();}
+function confirmName(){const v=$('bname').value.trim().slice(0,8)||myName();LS.set('farmBattle.name',v);const a=LS.get('farmBattle.board.v1',[]);let run=null;for(const r of a)if(r.d===lastRun){r.n=v;run=r;}const send=run&&SUPA.url&&!run.up;LS.set('farmBattle.board.v1',a);$('endName').style.display='none';if(send)pushScore(run).then(ok=>{if(ok){const b=LS.get('farmBattle.board.v1',[]);for(const r of b)if(r.d===run.d)r.up=1;LS.set('farmBattle.board.v1',b);}openBoard();});else openBoard();}
 $('endOk').addEventListener('click',confirmName);$('bname').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
 const QUESTS=[{t:'收集胡萝卜',n:8,f:()=>player.carrots},{t:'升到 5 级',n:5,f:()=>player.lv},{t:'赶跑捣蛋鬼',n:2,f:()=>player.kills},{t:'升到 12 级',n:12,f:()=>player.lv},{t:'赶跑大野猪拱拱',n:1,f:()=>boss&&!boss.alive?1:0}];let qi=0;
 function updateHud(){const st=stats(player);$('lv').textContent=player.lv>=MAXLV?'满':player.lv;$('lv').style.setProperty('--k',player.lv>99?.66:player.lv>9?.86:1);$('hpbar').firstChild.style.width=clamp(player.hp/st.maxhp*100,0,100)+'%';$('xpbar').firstChild.style.width=(player.lv>=MAXLV?100:player.xp/needXp(player.lv)*100)+'%';
@@ -840,6 +843,17 @@ function step(dt){simT+=dt;if(state!=='play')return;playT+=dt;streakT-=dt;pickT-
   for(const v of vehicles){if(v.isPlayer)continue;if(!v.alive){if(phase==='day'){v.respawn-=dt;if(v.respawn<=0)respawn(v);}continue;}aiUpdate(v,dt);}
   /* separation */
   for(let i=0;i<vehicles.length;i++){const a=vehicles[i];if(!a.alive)continue;for(let j=i+1;j<vehicles.length;j++){const b=vehicles[j];if(!b.alive)continue;const dx=b.x-a.x,dz=b.z-a.z,d=Math.hypot(dx,dz),min=1.25*(a.scale+b.scale);if(d<min&&d>0){const p=(min-d)/2,wa=b.scale/(a.scale+b.scale),wb=1-wa;a.x-=dx/d*p*2*wa;a.z-=dz/d*p*2*wa;b.x+=dx/d*p*2*wb;b.z+=dz/d*p*2*wb;}}}
+  /* front weapons, unlocked at the first evolution: shovel = bump damage, drill = contact damage + bleed, ram = dash strike, wind = gust that shoves */
+  for(const v of vehicles){if(!v.alive||v.lv<EVO[0])continue;const fw=FRONT[v.type];if(!fw)continue;v.fwT=(v.fwT||0)-dt;if(v.fwT>0)continue;const sh=Math.sin(v.h),ch=Math.cos(v.h),pw=1+.03*(v.lv-1);
+    if(fw==='wind'){let hit=false;for(const o of vehicles){if(o===v||!o.alive)continue;const dx=o.x-v.x,dz=o.z-v.z;if(Math.hypot(dx,dz)<8.5*v.scale&&Math.abs(angDiff(Math.atan2(dx,dz),v.h))<.55){o.kx+=sh*34/o.scale;o.kz+=ch*34/o.scale;hit=true;if(near(o.x,o.z))emote(o,'哇啊~',1);}}
+      if(hit){v.fwT=2.4;if(near(v.x,v.z)){for(let i=1;i<=5;i++)puff(v.x+sh*i*1.5*v.scale,1.2,v.z+ch*i*1.5*v.scale,0xdff6ff,2,2.5,.8);if(v.isPlayer)tone(300,900,.25,'sawtooth',.03);}}continue;}
+    if(fw==='ram'&&v.dashT<=0)continue;
+    const reach=fw==='ram'?1.1:.9,base=fw==='drill'?5:fw==='ram'?30:14,kb=fw==='drill'?0:fw==='ram'?6:3.5;let did=false;
+    for(const o of vehicles){if(o===v||!o.alive)continue;const dx=o.x-v.x,dz=o.z-v.z;if(Math.hypot(dx,dz)>1.25*(v.scale+o.scale)+reach||Math.abs(angDiff(Math.atan2(dx,dz),v.h))>.65)continue;
+      if(fw==='drill'){o.bleed=3;o.bleedBy=v;}damage(o,base*pw,v,sh*kb,ch*kb);did=true;}
+    if(v.isPlayer&&boss&&boss.alive&&phase==='boss'){const dx=boss.x-v.x,dz=boss.z-v.z;if(Math.hypot(dx,dz)<boss.R+1.3*v.scale+reach&&Math.abs(angDiff(Math.atan2(dx,dz),v.h))<.8){hitBoss(base*pw,v.x+sh*2.5,v.z+ch*2.5);did=true;}}
+    if(did){v.fwT=fw==='drill'?.25:fw==='ram'?.6:.55;if(near(v.x,v.z))puff(v.x+sh*1.8*v.scale,1,v.z+ch*1.8*v.scale,fw==='drill'?0xd9c7a0:0xffffff,3,2.5,.6);}}
+  for(const o of vehicles){if(o.alive&&o.bleed>0){o.bleed-=dt;o.bleedT=(o.bleedT||0)-dt;if(o.bleedT<=0){o.bleedT=.5;damage(o,3,o.bleedBy,0,0);}}}
   /* firing */
   for(const v of vehicles){if(!v.alive)continue;v.fireT-=dt;if(v.fireT>0)continue;const st=stats(v);let fired=false;
     for(const s of[1,-1]){if(!(s>0?v.cl:v.cr))continue;const nh=v.h+s*Math.PI/2;let best=null,bd=st.range;
@@ -852,8 +866,7 @@ function step(dt){simT+=dt;if(state!=='play')return;playT+=dt;streakT-=dt;pickT-
     if(!dead&&solids.some(s=>s.r>1&&Math.hypot(s.x-px,s.z-pz)<s.r))dead=true;
     if(!dead){if(p.owner===boss){if(player.alive&&Math.hypot(player.x-px,player.z-pz)<1.3*player.scale){dead=true;damage(player,p.dmg,boss,p.vx*.15,p.vz*.15);}}
       else{for(const o of vehicles){if(o===p.owner||!o.alive)continue;if(Math.hypot(o.x-px,o.z-pz)<1.25*o.scale+p.r){dead=true;damage(o,p.dmg,p.owner,p.vx*.1,p.vz*.1);break;}}
-        if(!dead&&boss&&boss.alive&&player.alive&&phase==='boss'&&p.owner===player&&Math.hypot(boss.x-px,boss.z-pz)<boss.R){dead=true;boss.hp-=p.dmg;boss.hitT=.15;floatAt('-'+Math.round(p.dmg),px,4.5,pz);SFX.hit();
-          if(boss.hp<=0){boss.alive=false;won=true;for(const q of shots)if(q.owner===boss)q.life=0;boss.g.visible=false;$('rage').classList.remove('on');boss.strip.visible=boss.ring.visible=false;puff(boss.x,2,boss.z,0xffffff,30,9,2.4);puff(boss.x,2,boss.z,0xffe45c,16,7,1.6);for(let k=0;k<30;k++)spawnCarrot(boss.x,boss.z,true);freeze=.2;shake=.4;SFX.ko();showBanner('拱拱被赶跑啦！',2.4);setTimeout(()=>endGame(true),2400);}}}}
+        if(!dead&&boss&&boss.alive&&player.alive&&phase==='boss'&&p.owner===player&&Math.hypot(boss.x-px,boss.z-pz)<boss.R){dead=true;hitBoss(p.dmg,px,pz);}}}
     if(dead){if(near(px,pz))puff(px,p.m.position.y,pz,p.m.material.color.getHex(),3,2.2,.5);scene.remove(p.m);p.m.material.dispose();shots.splice(i,1);}}
   if(phase==='boss'&&boss.alive&&player.alive)bossUpdate(dt);
   /* carrots */
@@ -923,7 +936,7 @@ HEROES.forEach((t,i)=>{const T=TYPES[t];const d=document.createElement('div');d.
   d.addEventListener('click',()=>{unlockAudio();sel=t;it.pop=1;PV.items.forEach((o,k)=>o.d.classList.toggle('sel',k===i));const go=$('go');go.classList.remove('off');go.textContent='开始游戏';tone(700,1000,.1,'triangle',.06);});$('cards').appendChild(d);});
 $('reroll').addEventListener('click',()=>{unlockAudio();HEROES.forEach((t,i)=>{looks[t]=randLook(t);pvBuild(i);});tone(500,900,.12,'triangle',.06);});
 $('go').addEventListener('click',()=>{if(sel>=0&&state==='menu')startGame(sel);});
-const DEX=[[0,'主角','','急性子，一着急刺就炸起来。开着爷爷留下的旧拖拉机。「让开让开！」'],[1,'主角','','慢吞吞的发明家，矿车是自己焊的，总在掉零件。「等等，我螺丝呢？」'],[2,'主角','','爱臭美的飙车手，每次冲刺前都要先理一下耳朵。「发型不能乱。」'],[6,'主角','','隔壁搬来的老爷爷，一年四季穿皮衣。把旧显卡改成了车，从 1060 一路升级到 5090，据说最后得拖着一座发电站才带得动。「算力就是马力！」'],
+const DEX=[[0,'主角','','急性子，一着急刺就炸起来。5 级装上推土铲，正面撞人一下一下掉血。「让开让开！」'],[1,'主角','','慢吞吞的发明家。5 级装上钻头，贴住对手让它持续掉血。「等等，我螺丝呢？」'],[2,'主角','','爱臭美的飙车手。5 级装上防撞杠，冲刺撞到谁谁飞。「发型不能乱。」'],[6,'主角','','隔壁搬来的老爷爷，一年四季穿皮衣。把旧显卡改成了车，从 1060 一路升级到 5090，5 级起风扇会把正前方的对手吹走。「算力就是马力！」'],
   [3,'捣蛋鬼','bad','骑着自行车来偷菜，嘴里能装下半个农场。跑得快，不经打，挨两下就溜。'],[4,'捣蛋鬼','bad','推着超市购物车，专扔烂番茄，射程比别人远。它管那叫「陈年佳酿」。'],[5,'捣蛋鬼','bad','头上顶着偷来的锅，皮厚、跑得慢，认准了就横冲直撞。'],
   [-1,'头目','boss','大野猪老大，贪吃。白天躲在东边栅栏外流口水，天黑了才敢进来抢收成。']];
 let dexBuilt=false;
