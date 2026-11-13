@@ -319,7 +319,7 @@ const PAINT=[[[0xf0584a,0xd4423a],[0x4fb8a8,0x379a8b],[0xf2a03a,0xd8842a],[0x6c8
   [[0xb07a4a,0x8a5a32],[0xc99a5a,0xa3743a],[0x8f6a52,0x6c4c38],[0xa8866a,0x82624a],[0xd0905a,0xa86c3a]],
   [[0x2b2f36,0x1b1e23],[0xc9ced6,0x9aa2ae],[0xf4f4f4,0xd0d4da],[0x2f6a4a,0x1f4a32],[0x5a4a9a,0x3f3378]],
   [[0xd9b06a,0xb98a45],[0xe8c88a,0xc9a05a],[0xc99a5a,0xa3743a],[0x9fd8c0,0x6fb89a],[0xf2a0a0,0xd87878]]];
-const FURS=[[0x9a6a44,0x86604e,0xb07c4a,0x8a7a6a],[0x7a6860,0x8f7d70,0x6c6674,0x9a7a62],[0xfffaf2,0xfff0cf,0xdcdce6,0xffdce4],[0xfffaf2,0xfff4dc,0xf0f0f6,0xffeef0],[0x8d8f9a,0x9a8f86,0x7f8794,0xa39a90],[0xa5744f,0x8f6a52,0xb8845a,0x96705c],[0xffffff,0xf2f2f2,0xe8e8f0,0xfff8ea],[0xfffaf0,0xfff0d8,0xf6e6ff,0xe8f6e0]];
+const FURS=[[0x9a6a44,0x86604e,0xb07c4a,0x8a7a6a],[0x7a6860,0x8f7d70,0x6c6674,0x9a7a62],[0xfffaf2,0xfff0cf,0xdcdce6,0xffdce4],[0xfffaf2,0xfff4dc,0xf0f0f6,0xffeef0],[0x8d8f9a,0x9a8f86,0x7f8794,0xa39a90],[0xa5744f,0x8f6a52,0xb8845a,0x96705c],[0xffffff,0xf2f2f2,0xe8e8f0,0xfff8ea],[0x2a2224,0x3a2c22,0x4a3628,0x2b2f36]];
 const SCARF=[0x4aa3e8,0xff8a2b,0xef5a4c,0x6cc04a,0xffd447,0xb58cff,0xff7fb0],HELM=[0xffd447,0xff9a3a,0xf4f4f4,0x5ab0f0,0x7fd865];
 const defaultLook=type=>({paint:0,fur:0,scarf:type===2?1:0,hat:0});
 const ri=n=>Math.floor(Math.random()*n);
@@ -412,14 +412,16 @@ function critter(type,look){const g=new THREE.Group(),head=new THREE.Group();g.u
     for(const s of[-1,1]){ball(hair,s*.5,0,-.06,.16,.26,.3,head);ball(skin,s*.57,-.02,.08,.09,.12,.07,head);const eb=ball(hair,s*.24,.25,.5,.13,.035,.05,head,false);eb.rotation.z=-s*.2;}
     eyes(head,.23,.08,.5,.075);ball(skin,0,-.04,.56,.085,.075,.08,head,false);smile(head,-.2,.52);blush(head,.4,-.1,.4);
     if(look.hat!==2){const gm=look.hat===1?M(0x15171b,{roughness:.25}):M(0x4a4038);for(const s of[-1,1]){const r=torus(gm,s*.23,.08,.56,.12,.022,head);r.castShadow=false;if(look.hat===1)ball(gm,s*.23,.08,.56,.11,.11,.02,head,false);}mesh(rbox(.14,.03,.03,.012),gm,0,.1,.58,head,false);}
-  }else if(type===7){/* red-bean bun */const bun=FurW(FURS[7][look.fur]),bean=Toy(0xb0413e);
-    ball(bun,0,-.02,0,.42,.36,.4,g);for(const s of[-1,1])ball(bun,s*.42,.04,.3,.12,.12,.14,g);
-    ball(bun,0,.02,0,.66,.58,.62,head);for(let i=0;i<9;i++){const a=i/9*6.283,p=ball(bun,Math.sin(a)*.2,.5,Math.cos(a)*.2,.07,.1,.2,head,false);p.rotation.y=a;p.rotation.x=-.5;}
-    ball(bun,0,.6,0,.1,.08,.1,head,false);eyes(head,.24,.02,.56,.085);smile(head,-.16,.6);blush(head,.42,-.12,.46);
-    if(look.hat===0)ball(bean,0,.3,.52,.07,.07,.04,head,false);else if(look.hat===1){for(let i=0;i<5;i++)ball(M(0x3a332e),-.16+i*.08,.36+(i%2)*.05,.5-Math.abs(i-2)*.02,.025,.035,.02,head,false);}else if(look.hat===2)hat(0,head,.66);
+  }else if(type===7){/* girl with a bob, red scarf and black tee */const skin=Fur(0xffe0c8),hair=Fur(FURS[7][look.fur]),tee=Toy(0x22242a),red=Toy(0xe8413c);
+    ball(tee,0,-.02,0,.44,.42,.38,g);for(const s of[-1,1]){ball(tee,s*.42,.06,.14,.15,.15,.17,g);ball(skin,s*.44,.02,.36,.11,.11,.12,g);}
+    const sc=torus(red,0,.36,.04,.36,.13,g);sc.rotation.x=Math.PI/2;sc.scale.z=.85;const tl=cap(red,-.26,.1,.38,.1,.3,g);tl.rotation.z=-.25;
+    ball(skin,0,0,.02,.6,.58,.56,head);ball(hair,0,.14,-.1,.66,.6,.62,head);ball(hair,0,.44,.24,.48,.16,.26,head);
+    for(const s of[-1,1]){ball(hair,s*.5,-.14,-.02,.2,.42,.36,head);const bg=ball(hair,s*.32,.36,.4,.18,.12,.12,head,false);bg.rotation.z=s*.35;}
+    eyes(head,.24,0,.52,.125);ball(skin,0,-.15,.56,.05,.04,.04,head,false);smile(head,-.25,.53);blush(head,.4,-.17,.42);
+    if(look.hat===1)hat(1,head,.62);else if(look.hat===3)hat(3,head,.62);else if(look.hat===2){const hc=mesh(rbox(.2,.06,.05,.02),Toy(0xffd447),.34,.34,.5,head,false);hc.rotation.z=-.4;}
   }
   /* crown for max level */
-  const crown=new THREE.Group();crown.userData.dyn=true;crown.position.y=[.74,.82,.6,.4,.6,.82,.7,.66][type];const gold=Toy(0xffc928);tube(gold,0,.1,0,.3,.26,.2,crown);for(let i=0;i<5;i++){const a=i/5*6.28;const c=mesh(G.cone,gold,Math.sin(a)*.27,.3,Math.cos(a)*.27,crown);c.scale.set(.09,.22,.09);ball(Toy(0xff5b6a),Math.sin(a)*.27,.42,Math.cos(a)*.27,.05,.05,.05,crown,false);}
+  const crown=new THREE.Group();crown.userData.dyn=true;crown.position.y=[.74,.82,.6,.4,.6,.82,.7,.74][type];const gold=Toy(0xffc928);tube(gold,0,.1,0,.3,.26,.2,crown);for(let i=0;i<5;i++){const a=i/5*6.28;const c=mesh(G.cone,gold,Math.sin(a)*.27,.3,Math.cos(a)*.27,crown);c.scale.set(.09,.22,.09);ball(Toy(0xff5b6a),Math.sin(a)*.27,.42,Math.cos(a)*.27,.05,.05,.05,crown,false);}
   crown.visible=false;head.add(crown);
   return{g,head,crown};}
 
@@ -432,7 +434,7 @@ const TYPES=[
   {name:'浣熊强盗',car:'购物车',shot:0xb8573a,shotE:0x6a7a2a,rgM:1.18},
   {name:'野猪小弟',car:'木桶车',shot:0xb9824a,shotE:0x6e4a2e,hpM:1.3,spM:.9},
   {name:'皮衣爷爷',car:'老爷爷 · 显卡车 1060',quote:'算力就是马力！',shot:0x8dffb0,shotE:0x1fc060},
-  {name:'豆包',car:'豆沙包 · 蒸笼车',quote:'热乎的，小心烫！',shot:0xc2504a,shotE:0x7a2420}];
+  {name:'豆包',car:'女生 · 蒸笼车',quote:'热乎的，小心烫！',shot:0xc2504a,shotE:0x7a2420}];
 function wheel(parent,x,y,z,R,w,hubMat,list,lugs=0){const g=new THREE.Group();g.userData.dyn=true;g.position.set(x,y,z);const tr=w/2,t=torus(M(0x4a4038,{roughness:.95}),0,0,0,R-tr,tr,g);t.rotation.y=Math.PI/2;
   const d=tube(M(0x3d342e),0,0,0,R-tr,R-tr,w*.7,g);d.rotation.z=Math.PI/2;ball(hubMat,0,0,0,w*.62,(R-tr)*.62,(R-tr)*.62,g);
   for(let i=0;i<3;i++){const a=i/3*6.28;ball(M(0x4a4038),Math.sign(x)*w*.55,Math.sin(a)*(R-tr)*.34,Math.cos(a)*(R-tr)*.34,.04,.05,.05,g,false);}
@@ -525,7 +527,7 @@ function buildVehicle(type,look=defaultLook(type)){const pal=PAINT[type][look.pa
     tube(bm,0,1.2,-.1,1.15,1.15,.7,body);for(const y of[.95,1.45]){const r=torus(bmD,0,y,-.1,1.16,.07,body);r.rotation.x=Math.PI/2;}tube(M(0x4a301c),0,1.56,-.1,1.0,1.0,.02,body,false);
     exhaust=tube(dark,0,1.25,1.25,.14,.18,.9,body);tube(dark,0,1.72,1.25,.2,.14,.1,body);mesh(rbox(.7,.5,.5,.12),Toy(0x8a8f98),0,1.1,1.25,body);ball(lampMat,0,1.12,1.52,.13,.13,.06,body,false);
     rod(body,woodD,-.7,.9,-1.45,-.7,1.7,-1.75,.05);rod(body,woodD,.7,.9,-1.45,.7,1.7,-1.75,.05);rod(body,wood,-.75,1.7,-1.75,.75,1.7,-1.75,.07);
-    seat=[0,1.72,-.1];hw=1.0;slots=[[.15,1.0,1.0],[.95,1.0,1.0],[-.8,1.0,1.0]];front=1.55;rear=-1.75;}
+    seat=[0,1.98,-.1];hw=1.0;slots=[[.15,1.0,1.0],[.95,1.0,1.0],[-.8,1.0,1.0]];front=1.55;rear=-1.75;}
   cy=slots[0][1];
   const cr=critter(type,look);cr.g.position.set(...seat);body.add(cr.g);
   const L=[],R=[];for(let i=0;i<3;i++)for(const s of[1,-1]){const c=cannon(type,s,pal);c.position.set(s*slots[i][2],slots[i][1],slots[i][0]);c.visible=false;body.add(c);(s>0?L:R).push(c);}
@@ -1029,7 +1031,7 @@ HEROES.forEach((t,i)=>{const T=TYPES[t];const d=document.createElement('div');d.
   d.addEventListener('click',()=>{unlockAudio();sel=t;it.pop=1;PV.items.forEach((o,k)=>o.d.classList.toggle('sel',k===i));const go=$('go');go.classList.remove('off');go.textContent='开始游戏';tone(700,1000,.1,'triangle',.06);});$('cards').appendChild(d);});
 $('reroll').addEventListener('click',()=>{unlockAudio();HEROES.forEach((t,i)=>{looks[t]=randLook(t);pvBuild(i);});tone(500,900,.12,'triangle',.06);});
 $('go').addEventListener('click',()=>{if(sel>=0&&state==='menu')startGame(sel);});
-const DEX=[[0,'主角','','急性子，一着急刺就炸起来。5 级装上推土铲，正面撞人一下一下掉血。「让开让开！」'],[1,'主角','','慢吞吞的发明家。5 级装上钻头，贴住对手让它持续掉血。「等等，我螺丝呢？」'],[2,'主角','','爱臭美的飙车手。5 级装上防撞杠，冲刺撞到谁谁飞。「发型不能乱。」'],[6,'主角','','隔壁搬来的老爷爷，一年四季穿皮衣。把旧显卡改成了车，从 1060 一路升级到 5090，5 级起风扇会把正前方的对手吹走。「算力就是马力！」'],[7,'主角','','刚出笼的豆沙包，软乎乎但脾气不小。5 级起会喷蒸汽，烫伤并推开前面的对手。「热乎的，小心烫！」'],
+const DEX=[[0,'主角','','急性子，一着急刺就炸起来。5 级装上推土铲，正面撞人一下一下掉血。「让开让开！」'],[1,'主角','','慢吞吞的发明家。5 级装上钻头，贴住对手让它持续掉血。「等等，我螺丝呢？」'],[2,'主角','','爱臭美的飙车手。5 级装上防撞杠，冲刺撞到谁谁飞。「发型不能乱。」'],[6,'主角','','隔壁搬来的老爷爷，一年四季穿皮衣。把旧显卡改成了车，从 1060 一路升级到 5090，5 级起风扇会把正前方的对手吹走。「算力就是马力！」'],[7,'主角','','短发、红围巾、黑 T 恤的大眼睛女生，推着蒸笼车来帮忙。5 级起会喷蒸汽，烫伤并推开前面的对手。「热乎的，小心烫！」'],
   [3,'捣蛋鬼','bad','骑着自行车来偷菜，嘴里能装下半个农场。跑得快，不经打，挨两下就溜。'],[4,'捣蛋鬼','bad','推着超市购物车，专扔烂番茄，射程比别人远。它管那叫「陈年佳酿」。'],[5,'捣蛋鬼','bad','头上顶着偷来的锅，皮厚、跑得慢，认准了就横冲直撞。'],
   [-1,'头目','boss','大野猪老大，贪吃。挨打挨急了会叫来三只小猪帮忙。'],[-2,'头目','boss','上半身鲨鱼、下半身蜜蜂，飞得快，会俯冲，还会甩出一圈毒针。'],[-3,'头目','boss','骑着火箭到处收购农场，不卖就扔炸弹。看到地上的红圈赶紧躲开。']];
 let dexBuilt=false;
