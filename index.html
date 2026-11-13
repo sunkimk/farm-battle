@@ -103,12 +103,12 @@
   .dexi img{width:84px;height:84px;border-radius:10px;background:radial-gradient(#e9f8c9,#bfe79a);flex:none}
   .dexi b{font-weight:400;font-size:18px;display:block}.dexi i{font-style:normal;font-size:12px;color:#fff;background:var(--orange);border-radius:8px;padding:0 7px 1px;margin-left:6px;vertical-align:2px}.dexi i.bad{background:#8a6a9a}.dexi i.boss{background:var(--red)}
   .dexi small{font-size:13px;color:var(--brown2);line-height:1.4;display:block}
-  #dex .sheet,#board .sheet{max-height:94vh;overflow:auto;touch-action:pan-y}
+  #dex .sheet{max-height:94vh;overflow:auto;touch-action:pan-y}
   #board,#dex{z-index:5}
-  #board .sheet{width:min(460px,92vw)}
+  #board .sheet{width:min(460px,92vw);max-height:94vh;display:flex;flex-direction:column;overflow:hidden}#board .sheet>*{flex:none}
   .brow0{display:flex;align-items:center;gap:10px;justify-content:center;font-size:15px;margin:12px 0 0}.brow0 .btn{margin-top:0;font-size:18px;padding:6px 20px 8px}
   #bname{font:inherit;font-size:17px;color:var(--brown);width:150px;height:40px;padding:0 10px;border:2px solid var(--brown);border-radius:10px;background:#fff;text-align:center;user-select:text;-webkit-user-select:text;touch-action:auto;outline:none}
-  .blist{display:flex;flex-direction:column;gap:5px;text-align:left}
+  #board .blist{flex:1 1 auto;min-height:0;overflow-y:auto;touch-action:pan-y;padding:3px}.blist{display:flex;flex-direction:column;gap:5px;text-align:left}.bi{flex:none}
   .bi{display:flex;align-items:center;gap:10px;padding:5px 12px 6px 8px;border-radius:11px;background:#fffbee;border:2px solid #e2c98f;font-size:16px}
   .bi.me{background:#ffe9b0;border-color:var(--orange)}.bi.new{box-shadow:0 0 0 3px #ffd24a}
   .bi u{text-decoration:none;width:28px;height:28px;border-radius:50%;background:#e9d3a0;display:grid;place-items:center;font-size:15px;flex:none}
@@ -787,19 +787,28 @@ async function fetchTop(){if(!SUPA.url)return null;try{const r=await fetch(SUPA.
 if(!LS.get('farmBattle.name',''))LS.set('farmBattle.name','小菜农'+(1000+ri(9000)));
 const myName=()=>(LS.get('farmBattle.name','')||'小菜农');
 function calcScore(win){return player.lv*100+player.kills*60+player.carrots*2+(win?2000:0);}
-function saveRun(win){const run={n:myName(),s:calcScore(win),lv:player.lv,k:player.kills,w:win?1:0,t:player.type,d:Date.now()};const a=LS.get('farmBattle.board.v1',[]);const best=a.length?Math.max(...a.map(r=>r.s)):-1;a.push(run);a.sort((x,y)=>y.s-x.s);LS.set('farmBattle.board.v1',a.slice(0,20));lastRun=run.d;
+function saveRun(win){const run={n:myName(),s:calcScore(win),lv:player.lv,k:player.kills,w:win?1:0,t:player.type,d:Date.now()};const a=LS.get('farmBattle.board.v1',[]);const best=a.length?Math.max(...a.map(r=>r.s)):-1;a.push(run);a.sort((x,y)=>y.s-x.s);{const keep=a.slice(0,20);if(!keep.includes(run))keep.push(run);LS.set('farmBattle.board.v1',keep);}lastRun=run.d;
   const rank=1+a.filter(r=>r.s>run.s).length;return{run,rank,record:run.s>best};}
-function renderBoard(online){const mine=LS.get('farmBattle.board.v1',[]).slice(0,10).map(r=>({n:r.n||myName(),s:r.s,me:1,sub:'Lv.'+r.lv+(r.w?' · 赶跑了拱拱':''),nw:r.d===lastRun}));
-  const lr=LS.get('farmBattle.board.v1',[]).find(r=>r.d===lastRun),all=online?online.map(r=>({n:String(r.name),s:r.score,sub:'Lv.'+r.lv+(r.win?' · 赶跑了拱拱':''),me:r.name===myName(),nw:!!lr&&r.name===lr.n&&r.score===lr.s})):mine,box=$('blist');box.innerHTML='';
-  all.forEach((r,i)=>{const d=document.createElement('div');d.className='bi'+(r.me?' me':'')+(r.nw?' new':'');const sp=document.createElement('span');sp.textContent=r.n;
-    if(r.sub){const sm=document.createElement('small');sm.textContent=r.sub;sp.appendChild(sm);}
-    const u=document.createElement('u');u.textContent=i+1;const b=document.createElement('b');b.textContent=r.s;d.append(u,sp,b);box.appendChild(d);});
-  if(!all.length){const d=document.createElement('div');d.className='sub';d.style.margin='6px 0 0';d.textContent='还没有成绩，打一局试试！';box.appendChild(d);}}
+function renderBoard(online){const loc=LS.get('farmBattle.board.v1',[]),lr=loc.find(r=>r.d===lastRun);let all;
+  if(online&&online.length)all=online.map((r,i)=>({rk:i+1,n:String(r.name),s:r.score,sub:'Lv.'+r.lv+(r.win?' · 赶跑了拱拱':''),me:loc.some(q=>q.up&&q.n===r.name&&q.s===r.score),nw:!!lr&&r.name===lr.n&&r.score===lr.s}));
+  else{const m=loc.map((r,i)=>({rk:i+1,n:r.n||myName(),s:r.s,me:1,sub:'Lv.'+r.lv+(r.w?' · 赶跑了拱拱':''),nw:r.d===lastRun}));all=m.slice(0,10);const cur=m.find(r=>r.nw);if(cur&&!all.includes(cur))all.push(cur);}
+  const box=$('blist');box.innerHTML='';
+  all.forEach(r=>{const d=document.createElement('div');d.className='bi'+(r.me?' me':'')+(r.nw?' new':'');const u=document.createElement('u');u.textContent=r.rk;const sp=document.createElement('span');sp.textContent=r.n;
+    if(r.sub){const sm=document.createElement('small');sm.textContent=r.sub;sp.appendChild(sm);}const b=document.createElement('b');b.textContent=r.s;d.append(u,sp,b);box.appendChild(d);});
+  if(!all.length){const d=document.createElement('div');d.className='sub';d.style.margin='6px 0 0';d.textContent='还没有成绩，打一局试试！';box.appendChild(d);}
+  const nw=box.querySelector('.new');if(nw)box.scrollTop=Math.max(0,nw.offsetTop-box.offsetTop-box.clientHeight/2+nw.offsetHeight/2);else box.scrollTop=0;}
+let boardBusy=false;
+/* uploads every confirmed run that has not reached the server yet (so a failed upload is retried next time), then loads the top list */
+async function syncBoard(){$('bnote').textContent='正在读取总榜…';let failed=false;const pend=LS.get('farmBattle.board.v1',[]).filter(r=>r.c&&!r.up);
+  for(const r of pend){const ok=await pushScore(r);if(ok){const b=LS.get('farmBattle.board.v1',[]);for(const q of b)if(q.d===r.d)q.up=1;LS.set('farmBattle.board.v1',b);}else failed=true;}
+  const rows=await fetchTop(),tail=failed?' · 有成绩没传上去，下次打开榜单会自动重试':'';
+  if(rows&&rows.length){renderBoard(rows);$('bnote').textContent='所有玩家的成绩 · 前 30 名'+tail;}
+  else{renderBoard();$('bnote').textContent=(rows?'总榜还没有人上榜，先显示这台设备上的成绩':'总榜暂时连不上，先显示这台设备上的成绩')+tail;}}
 function openBoard(){renderBoard();$('boardAgain').style.display=state==='over'?'':'none';$('board').classList.add('on');
-  if(SUPA.url){$('bnote').textContent='正在读取总榜…';fetchTop().then(rows=>{if(rows){renderBoard(rows);$('bnote').textContent='所有玩家的成绩 · 前 30 名';}else $('bnote').textContent='总榜暂时连不上，先显示这台设备上的成绩';});}else $('bnote').textContent='这台设备上的成绩';}
+  if(!SUPA.url)$('bnote').textContent='这台设备上的成绩';else if(!boardBusy){boardBusy=true;syncBoard().finally(()=>{boardBusy=false;});}}
 $('boardBtn').addEventListener('click',()=>{unlockAudio();openBoard();});$('boardX').addEventListener('click',()=>$('board').classList.remove('on'));$('boardAgain').addEventListener('click',()=>location.reload());
-function confirmName(){const v=$('bname').value.trim().slice(0,8)||myName();LS.set('farmBattle.name',v);const a=LS.get('farmBattle.board.v1',[]);let run=null;for(const r of a)if(r.d===lastRun){r.n=v;run=r;}const send=run&&SUPA.url&&!run.up;LS.set('farmBattle.board.v1',a);$('endName').style.display='none';if(send)pushScore(run).then(ok=>{if(ok){const b=LS.get('farmBattle.board.v1',[]);for(const r of b)if(r.d===run.d)r.up=1;LS.set('farmBattle.board.v1',b);}openBoard();});else openBoard();}
-$('endOk').addEventListener('click',confirmName);$('bname').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
+function confirmName(){if($('endName').style.display==='none')return;const v=$('bname').value.trim().slice(0,8)||myName();LS.set('farmBattle.name',v);const a=LS.get('farmBattle.board.v1',[]);for(const r of a)if(r.d===lastRun){r.n=v;r.c=1;}LS.set('farmBattle.board.v1',a);$('endName').style.display='none';openBoard();}
+$('endOk').addEventListener('click',confirmName);$('bname').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229)confirmName();});
 const QUESTS=[{t:'收集胡萝卜',n:8,f:()=>player.carrots},{t:'升到 5 级',n:5,f:()=>player.lv},{t:'赶跑捣蛋鬼',n:2,f:()=>player.kills},{t:'升到 12 级',n:12,f:()=>player.lv},{t:'赶跑大野猪拱拱',n:1,f:()=>boss&&!boss.alive?1:0}];let qi=0;
 function updateHud(){const st=stats(player);$('lv').textContent=player.lv>=MAXLV?'满':player.lv;$('lv').style.setProperty('--k',player.lv>99?.66:player.lv>9?.86:1);$('hpbar').firstChild.style.width=clamp(player.hp/st.maxhp*100,0,100)+'%';$('xpbar').firstChild.style.width=(player.lv>=MAXLV?100:player.xp/needXp(player.lv)*100)+'%';
   $('kills').textContent='赶跑捣蛋鬼 '+player.kills;$('dash').style.setProperty('--e',player.energy/100);
@@ -849,7 +858,7 @@ function step(dt){simT+=dt;if(state!=='play')return;playT+=dt;streakT-=dt;pickT-
       if(hit){v.fwT=2.4;if(near(v.x,v.z)){for(let i=1;i<=5;i++)puff(v.x+sh*i*1.5*v.scale,1.2,v.z+ch*i*1.5*v.scale,0xdff6ff,2,2.5,.8);if(v.isPlayer)tone(300,900,.25,'sawtooth',.03);}}continue;}
     if(fw==='ram'&&v.dashT<=0)continue;
     const reach=fw==='ram'?1.1:.9,base=fw==='drill'?5:fw==='ram'?30:14,kb=fw==='drill'?0:fw==='ram'?6:3.5;let did=false;
-    for(const o of vehicles){if(o===v||!o.alive)continue;const dx=o.x-v.x,dz=o.z-v.z;if(Math.hypot(dx,dz)>1.25*(v.scale+o.scale)+reach||Math.abs(angDiff(Math.atan2(dx,dz),v.h))>.65)continue;
+    for(const o of vehicles){if(o===v||!o.alive)continue;if(!v.isPlayer&&!o.isPlayer&&v.ai.target!==o&&o.ai.target!==v)continue;const dx=o.x-v.x,dz=o.z-v.z;if(Math.hypot(dx,dz)>1.25*(v.scale+o.scale)+reach||Math.abs(angDiff(Math.atan2(dx,dz),v.h))>.65)continue;
       if(fw==='drill'){o.bleed=3;o.bleedBy=v;}damage(o,base*pw,v,sh*kb,ch*kb);did=true;}
     if(v.isPlayer&&boss&&boss.alive&&phase==='boss'){const dx=boss.x-v.x,dz=boss.z-v.z;if(Math.hypot(dx,dz)<boss.R+1.3*v.scale+reach&&Math.abs(angDiff(Math.atan2(dx,dz),v.h))<.8){hitBoss(base*pw,v.x+sh*2.5,v.z+ch*2.5);did=true;}}
     if(did){v.fwT=fw==='drill'?.25:fw==='ram'?.6:.55;if(near(v.x,v.z))puff(v.x+sh*1.8*v.scale,1,v.z+ch*1.8*v.scale,fw==='drill'?0xd9c7a0:0xffffff,3,2.5,.6);}}
