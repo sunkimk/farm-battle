@@ -80,6 +80,7 @@
   .tagbar b{position:absolute;left:50%;bottom:135%;translate:-50% 0;background:#fff;border:2px solid var(--brown);border-radius:12px;padding:1px 9px 2px;font-size:14px;font-weight:400;color:var(--brown);white-space:nowrap;display:none;box-shadow:0 2px 0 var(--brown)}
   .tagbar b.on{display:block;animation:emo .25s cubic-bezier(.3,1.7,.5,1)}
   @keyframes emo{from{scale:.3;opacity:0}}
+  .tagbar.bosstag em{background:var(--red);font-size:14px;padding:0 8px;height:24px;border-radius:12px}.tagbar.bosstag span{width:118px;height:13px;border-radius:8px}
   .tagbar.me em{background:var(--orange)} .tagbar.me span i{background:var(--green)}
   .float{position:absolute;transform:translate(-50%,-50%);font-size:21px;color:#fff;text-shadow:0 2px 0 var(--brown),-1px 0 0 var(--brown),1px 0 0 var(--brown),0 -1px 0 var(--brown);animation:fl .8s ease-out forwards;white-space:nowrap}
   .float.xp{color:#ffd24a;font-size:17px}.float.big{font-size:30px;color:#ffe45c}.float.me{color:#ff8f7f}
@@ -132,12 +133,18 @@
   .btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--green-d)}
   .stats{display:flex;gap:18px;justify-content:center;font-size:17px;margin-top:8px}
   .stats b{display:block;font-weight:400;font-size:30px;color:var(--orange)}
+  /* compact top HUD */
+  #timer{padding:0 14px;height:38px;font-size:15px;gap:6px;box-shadow:0 3px 0 var(--brown)}#timer b{font-size:19px;min-width:44px}#timer svg{width:17px;height:17px}
+  #kills{top:calc(52px + env(safe-area-inset-top));font-size:13px}
+  #tl{width:172px;gap:6px}#stat{padding:0 11px 0 4px;gap:7px;height:38px;border-radius:999px;box-shadow:0 3px 0 var(--brown)}#lv{--lf:15px;width:28px;height:28px;border-width:2px}.bars{gap:3px}#stat .bar{height:8px}
+  #quest{padding:4px 10px 6px;font-size:13px;border-radius:12px;border-width:2px;box-shadow:0 3px 0 var(--brown)}#quest h4{display:none}#quest .row{margin-bottom:3px}#quest .bar{height:6px;border-width:1.5px}
+  #mute{width:38px;height:38px;box-shadow:0 3px 0 var(--brown)}
   @media (pointer:coarse){#hint{display:none}}
   @media (orientation:portrait) and (max-width:640px){
     #timer{left:auto;right:calc(60px + env(safe-area-inset-right));transform:none;font-size:15px;padding:0 13px;height:40px;gap:5px;box-shadow:0 3px 0 var(--brown)}#timer b{font-size:20px;min-width:44px}#timer svg{width:18px;height:18px}#bossbar{width:86px;height:12px}
-    #tlabel{display:none}#timer.hurry{animation:none}
+    #timer{white-space:nowrap}#timer.hurry{animation:none}
     #mute{box-shadow:0 3px 0 var(--brown)}
-    #tl{width:158px;gap:7px}#stat{padding:0 11px 0 4px;gap:7px;height:40px;border-radius:999px;box-shadow:0 3px 0 var(--brown)}#lv{--lf:16px;width:30px;height:30px;border-width:2px}.bars{gap:3px}#stat .bar{height:9px}
+    #tl{width:148px;gap:6px}#stat{padding:0 11px 0 4px;gap:7px;height:40px;border-radius:999px;box-shadow:0 3px 0 var(--brown)}#lv{--lf:16px;width:30px;height:30px;border-width:2px}.bars{gap:3px}#stat .bar{height:9px}
     #quest{padding:5px 10px 7px;font-size:13px;border-radius:13px;border-width:2px;box-shadow:0 3px 0 var(--brown)}#quest h4{display:none}#quest .row{margin-bottom:3px}#quest .bar{height:7px;border-width:1.5px}
     #kills{top:calc(57px + env(safe-area-inset-top));left:auto;right:calc(12px + env(safe-area-inset-right));transform:none;font-size:13px}#hint{display:none}
     #joy{left:calc(22px + env(safe-area-inset-left));bottom:calc(44px + env(safe-area-inset-bottom))}#dash{right:calc(24px + env(safe-area-inset-right));bottom:calc(52px + env(safe-area-inset-bottom))}
@@ -154,7 +161,7 @@
   <div id="hud">
     <div id="timer" class="panel">
       <svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="#ffc94a" stroke="#7a4a22" stroke-width="2" stroke-linejoin="round"/></svg>
-      <span id="tlabel">离天黑还有</span> <b id="time">2:00</b><div id="bossbar"><i style="width:100%"></i></div>
+      <span id="tlabel">第 1 天</span> <b id="time">2:00</b>
     </div>
     <div id="kills">赶跑捣蛋鬼 0</div>
     <div id="tl">
@@ -177,7 +184,7 @@
   <div class="tip" style="margin:0 0 4px;font-size:17px">悬停或点一下看造型，选好后开始 · 大家开局一样大</div>
   <div class="cards" id="cards"></div>
   <div class="mrow"><div class="btn alt" id="boardBtn">排行榜</div><div class="btn alt" id="dexBtn">图鉴</div><div class="btn alt" id="reroll">换个造型</div><div class="btn off" id="go">先选一位小车手</div></div>
-  <div class="tip last">丰收节前夜，大野猪拱拱带着捣蛋鬼来抢收成：开上农机，守住农场！</div>
+  <div class="tip last">大野猪拱拱带着捣蛋鬼来抢收成：开上农机守住农场，活得越久对手越强！</div>
 </div></div>
 <div id="dex" class="overlay"><div class="sheet panel"><h2>农场图鉴</h2><div class="dexg" id="dexg"></div><div class="btn" id="dexX">关闭</div></div></div>
 <div id="board" class="overlay"><div class="sheet panel"><h2>总排行榜</h2>
@@ -617,7 +624,8 @@ $('mute').addEventListener('pointerdown',e=>{e.stopPropagation();muted=!muted;$(
 /* =============== game state =============== */
 const MAXLV=256,EVO=[5,12,25];
 let state='menu',phase='day',timeLeft=+(Q.get('time')||120),simT=0,playT=0,freeze=0,shake=0,nightK=0,camF=1,pending=0;
-let player=null,boss=null,nightT=0,introT=0;const vehicles=[],carrots=[],shots=[],puffs=[];
+let player=null,boss=null,nightT=0,introT=0,day=1,bossKills=0,nextDayT=0,catchT=8,addT=30;
+const MAXEN=MOBILE?8:10;const vehicles=[],carrots=[],shots=[],puffs=[];
 const FRONT={0:'shovel',1:'drill',2:'ram',5:'shovel',6:'wind'};
 const needXp=lv=>Math.min(30,4+Math.floor(lv*.8));
 const scaleOf=lv=>1+1.2*(1-Math.exp(-(Math.min(lv,MAXLV)-1)/14));
@@ -670,7 +678,7 @@ function fireSide(v,s,target,st){const n=s>0?v.cl:v.cr,a0=Math.atan2(target.x-v.
     const m=new THREE.Mesh(G.sph,new THREE.MeshStandardMaterial({color:T.shot,emissive:T.shotE,emissiveIntensity:.4,roughness:.35}));const r=.24*(.85+.15*sc);m.scale.setScalar(r);m.position.set(x,y,z);m.castShadow=true;scene.add(m);
     const aa=a+(n>1?(i-(n-1)/2)*.05:0);shots.push({m,vx:Math.sin(aa)*st.pspeed,vz:Math.cos(aa)*st.pspeed,t:0,life:st.range/st.pspeed,dmg:st.dmg,owner:v,r});if(near(x,z))puff(x,y,z,T.shot,2,1.5,.5);}
   v.recoil=1;if(v.isPlayer)SFX.shoot();else if(near(v.x,v.z,18))SFX.far();}
-function damage(v,amt,from,dx,dz){if(!v.alive||state!=='play'||(won&&v.isPlayer))return;if(v.isPlayer&&from!==boss)amt*=.75;amt=Math.round(amt);v.hp-=amt;v.hitT=.2;const k=2.2/v.scale;v.kx+=dx*k;v.kz+=dz*k;
+function damage(v,amt,from,dx,dz){if(!v.alive||state!=='play'||(won&&v.isPlayer))return;if(v.isPlayer)amt*=(from===boss?1:.75)*Math.min(1.8,1+.12*(day-1));amt=Math.round(amt);v.hp-=amt;v.hitT=.2;const k=2.2/v.scale;v.kx+=dx*k;v.kz+=dz*k;
   if(v.isPlayer){floatAt('-'+amt,v.x,3.2*v.scale,v.z,'me');SFX.hurt();if(amt>=14&&simT-lastHurt>1.2){lastHurt=simT;emote(v,'好痛！',1);$('hurt').style.opacity=.55;setTimeout(()=>$('hurt').style.opacity=0,160);}}
   else if(from===player&&near(v.x,v.z)){floatAt('-'+amt,v.x,3*v.scale,v.z);{SFX.hit();if(rnd()<.12)emote(v,['哎哟','别打啦','疼疼疼'][Math.floor(rnd(3))],1);}}
   if(!v.isPlayer&&from&&from.alive!==false&&v.ai.mode!=='flee'&&from!==boss){if(v.ai.mode!=='fight')v.ai.fightT=rnd(7,12);v.ai.target=from;v.ai.mode='fight';}
@@ -680,7 +688,7 @@ function knockOut(v,from){v.alive=false;v.koT=.75;v.tag.style.display='none';puf
   for(let k=0,n=Math.min(24,4+v.lv*3);k<n&&carrots.length<150;k++)spawnCarrot(v.x,v.z,true);if(hearts.length<6&&rnd()<.4)spawnHeart(v.x+rnd(-1.5,1.5),v.z+rnd(-1.5,1.5));v.respawn=rnd(4,7);
   if(from&&from!==boss)from.kills++;
   if(from===player){SFX.ko();floatAt('赶跑啦！',v.x,3.6*v.scale,v.z,'big');ringFx(v.x,v.z,0xffffff,8*v.scale,.5);emote(player,'耶！',1.2);streak=streakT>0?streak+1:1;streakT=7;if(streak>=2){showBanner(['','','二连赶！','三连赶！','四连赶！','势不可挡！'][Math.min(5,streak)],1.6);for(let i=0;i<Math.min(5,streak);i++)tone(600*Math.pow(1.19,i),600*Math.pow(1.19,i),.1,'triangle',.07,i*.07);}}}
-function respawn(v){const[x,z]=freeSpot(24);v.x=x;v.z=z;v.h=rnd(6.28);v.v=0;v.kx=v.kz=0;v.lv=1;v.xp=0;v.cl=v.cr=0;for(const k in v.up)v.up[k]=0;setLevel(v,clamp(player.lv+Math.floor(rnd(-4,1.2)),1,MAXLV));v.alive=true;v.koT=0;v.bleed=0;v.fwT=0;v.vis.root.rotation.set(0,v.h,0);v.vis.root.visible=true;v.tag.style.display='flex';v.ai.mode='forage';v.ai.target=null;}
+function respawn(v){const[x,z]=freeSpot(24);v.x=x;v.z=z;v.h=rnd(6.28);v.v=0;v.kx=v.kz=0;v.lv=1;v.xp=0;v.cl=v.cr=0;for(const k in v.up)v.up[k]=0;setLevel(v,clamp(player.lv+Math.floor(rnd(-2,2.4)),1,MAXLV));v.alive=true;v.koT=0;v.bleed=0;v.fwT=0;v.vis.root.rotation.set(0,v.h,0);v.vis.root.visible=true;v.tag.style.display='flex';v.ai.mode='forage';v.ai.target=null;}
 
 /* driving shared by player and AI */
 function collide(o,r){for(const s of solids){const dx=o.x-s.x,dz=o.z-s.z,d=Math.hypot(dx,dz),min=s.r+r;if(d<min&&d>0){o.x=s.x+dx/d*min;o.z=s.z+dz/d*min;}}const L=HALF-.6-r;o.x=clamp(o.x,-L,L);o.z=clamp(o.z,-L,L);}
@@ -695,7 +703,7 @@ function tryDash(v){if(v.energy>=35&&v.dashT<=0){v.energy-=35;v.dashT=.38;if(nea
 function attackersOn(t,self){let n=0;for(const o of vehicles)if(o!==self&&o.alive&&!o.isPlayer&&o.ai.mode==='fight'&&o.ai.target===t)n++;return n;}
 function aiThink(a){const A=a.ai;A.think=rnd(.35,.7);const st=stats(a);let best=null,bd=17+3*a.scale,threat=null,td=14;
   for(const o of vehicles){if(o===a||!o.alive)continue;const d=Math.hypot(o.x-a.x,o.z-a.z);if(d<td){threat=o;td=d;}
-    if(o.isPlayer){if(o.corn&&d>6)continue;if(attackersOn(o,a)>=(player.lv>=5?3:2))continue;if(playT<6)continue;}
+    if(o.isPlayer){if(o.corn&&d>6)continue;if(attackersOn(o,a)>=Math.min(6,(player.lv>=5?3:2)+(day-1)))continue;if(playT<6)continue;}
     else if(attackersOn(o,a)>=1)continue;
     if(o.lv>a.lv+2)continue;const w=d*(o.isPlayer?.85:1.15);if(w<bd){best=o;bd=w;}}
   if(A.mode==='fight'&&A.target&&A.target.alive&&Math.hypot(A.target.x-a.x,A.target.z-a.z)<24&&!(A.target.isPlayer&&A.target.corn))best=A.target;
@@ -724,7 +732,8 @@ function buildBoss(only){const g=new THREE.Group(),b=new THREE.Group();b.userDat
   bake(g);g.scale.setScalar(1.15);if(only)return g;g.visible=false;scene.add(g);
   const strip=new THREE.Group(),sm=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:0xff4a3c,transparent:true,opacity:.35,depthWrite:false}));sm.rotation.x=-Math.PI/2;sm.scale.set(6.5,30,1);sm.position.set(0,.07,15);strip.add(sm);strip.visible=false;scene.add(strip);
   const ring=new THREE.Mesh(new THREE.CircleGeometry(1,48),new THREE.MeshBasicMaterial({color:0xff4a3c,transparent:true,opacity:.3,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.07;ring.visible=false;scene.add(ring);
-  Fur(0x9a6a4a).emissive.setHex(0);return{g,b,strip,ring,x:0,z:0,h:0,hp:1100,max:1100,state:'walk',t:0,cd:2.5,hitT:0,touch:0,alive:true,scale:1,lv:99,kills:0,R:3.3};}
+  Fur(0x9a6a4a).emissive.setHex(0);const tag=document.createElement('div');tag.className='tagbar bosstag';tag.innerHTML='<em>拱拱</em><span><i></i></span>';tag.style.display='none';$('world').appendChild(tag);
+  return{g,b,strip,ring,tag,x:0,z:0,h:0,hp:1100,max:1100,state:'walk',t:0,cd:2.5,hitT:0,touch:0,alive:true,scale:1,lv:99,kills:0,R:3.3};}
 function bossUpdate(dt){const B=boss;if(!B.alive)return;const dx=player.x-B.x,dz=player.z-B.z,d=Math.hypot(dx,dz),ang=Math.atan2(dx,dz);B.t+=dt;B.hitT=Math.max(0,B.hitT-dt);B.touch-=dt;
   if(!B.enr&&B.hp<B.max*.5){B.enr=true;showBanner('拱拱发怒了！',2);SFX.roar();shake=.4;Fur(0x9a6a4a).emissive.setHex(0x8a1608);$('rage').classList.add('on');puff(B.x,3,B.z,0xff6a5a,16,7,1.6);}
   if(B.enr&&rnd()<dt*5)puff(B.x+Math.sin(B.h)*4.8,2,B.z+Math.cos(B.h)*4.8,0xffffff,1,1.5,.7);
@@ -741,14 +750,17 @@ function bossUpdate(dt){const B=boss;if(!B.alive)return;const dx=player.x-B.x,dz
   B.x=clamp(B.x,-HALF+4,HALF-4);B.z=clamp(B.z,-HALF+4,HALF-4);
   if(d<B.R+1.3*player.scale&&B.state!=='charge'){const k=1/Math.max(d,.1);player.x=B.x+dx*k*(B.R+1.3*player.scale);player.z=B.z+dz*k*(B.R+1.3*player.scale);collide(player,1.3*player.scale);if(B.touch<=0){damage(player,8,boss,dx*k*5,dz*k*5);B.touch=1;}}
   B.g.position.set(B.x,0,B.z);B.g.rotation.y=B.h;const sq=B.hitT>0?1+Math.sin(B.hitT/.15*Math.PI)*.06:1;B.b.scale.set(sq,2-sq,sq);if(B.state==='walk')B.b.position.y=Math.abs(Math.sin(simT*6))*.18;B.b.rotation.z=B.state==='walk'?Math.sin(simT*6)*.04:0;
-  $('bossbar').firstChild.style.width=Math.max(0,B.hp/B.max*100)+'%';}
+  }
 function hitBoss(dmg,x,z){if(!boss.alive)return;boss.hp-=dmg;boss.hitT=.15;floatAt('-'+Math.round(dmg),x,4.5,z);SFX.hit();
-  if(boss.hp<=0){boss.alive=false;won=true;for(const q of shots)if(q.owner===boss)q.life=0;boss.g.visible=false;$('rage').classList.remove('on');boss.strip.visible=boss.ring.visible=false;puff(boss.x,2,boss.z,0xffffff,30,9,2.4);puff(boss.x,2,boss.z,0xffe45c,16,7,1.6);for(let k=0;k<30;k++)spawnCarrot(boss.x,boss.z,true);freeze=.2;shake=.4;SFX.ko();showBanner('拱拱被赶跑啦！',2.4);setTimeout(()=>endGame(true),2400);}}
+  if(boss.hp<=0){boss.alive=false;won=true;for(const q of shots)if(q.owner===boss)q.life=0;boss.g.visible=false;$('rage').classList.remove('on');boss.strip.visible=boss.ring.visible=false;puff(boss.x,2,boss.z,0xffffff,30,9,2.4);puff(boss.x,2,boss.z,0xffe45c,16,7,1.6);for(let k=0;k<30;k++)spawnCarrot(boss.x,boss.z,true);freeze=.2;shake=.4;SFX.ko();bossKills++;showBanner('拱拱被赶跑啦！',2.2);nextDayT=2.6;}}
+function startDay(){day++;phase='day';won=false;timeLeft=100;$('time').style.display='';showBanner('第 '+day+' 天 · 捣蛋鬼更强了',2.6);
+  for(const v of vehicles)if(!v.isPlayer&&!v.alive)v.respawn=rnd(.5,3.5);
+  if(vehicles.length-1<MAXEN){const v=makeVehicle(3+ri(3),false);v.alive=false;v.vis.root.visible=false;v.tag.style.display='none';v.respawn=rnd(1,3);}}
 function startNight(){if(phase!=='day')return;phase='night';timeLeft=0;showBanner('天黑了，捣蛋鬼们溜走了…',2.4);boss.g.visible=false;
   for(const v of vehicles)if(!v.isPlayer){if(v.alive)puff(v.x,1.2,v.z,0xffffff,8,4,1.2);v.alive=false;v.koT=0;v.vis.root.visible=false;v.tag.style.display='none';v.respawn=1e9;}
   nightT=0;}
-function spawnBoss(){const a=rnd(6.28);boss.x=clamp(player.x+Math.sin(a)*22,-HALF+6,HALF-6);boss.z=clamp(player.z+Math.cos(a)*22,-HALF+6,HALF-6);boss.g.visible=true;phase='intro';introT=0;boss.max=boss.hp=900+player.lv*35;boss.h=Math.atan2(player.x-boss.x,player.z-boss.z);boss.g.position.set(boss.x,0,boss.z);boss.g.rotation.y=boss.h;boss.g.scale.setScalar(.001);$('bossIntro').classList.add('on');$('banner').classList.remove('on');for(let i=0;i<4;i++)tone(880,620,.2,'square',.05,i*.3);
-    $('tlabel').textContent='拱拱';$('timer').classList.add('boss');$('time').style.display='none';$('bossbar').style.display='block';}
+function spawnBoss(){const a=rnd(6.28);boss.x=clamp(player.x+Math.sin(a)*22,-HALF+6,HALF-6);boss.z=clamp(player.z+Math.cos(a)*22,-HALF+6,HALF-6);boss.g.visible=true;phase='intro';introT=0;boss.max=boss.hp=Math.round((900+player.lv*35)*(1+.45*(day-1)));boss.alive=true;boss.enr=false;boss.popped=boss.roared=false;boss.state='walk';boss.t=0;boss.cd=Math.max(1.2,2.5-.25*(day-1));Fur(0x9a6a4a).emissive.setHex(0);boss.h=Math.atan2(player.x-boss.x,player.z-boss.z);boss.g.position.set(boss.x,0,boss.z);boss.g.rotation.y=boss.h;boss.g.scale.setScalar(.001);$('bossIntro').classList.add('on');$('banner').classList.remove('on');for(let i=0;i<4;i++)tone(880,620,.2,'square',.05,i*.3);
+    $('time').style.display='none';}
 
 /* =============== input =============== */
 const mouse={down:false,x:0,y:0};const keys={},joy={x:0,y:0,id:null},joyEl=$('joy'),knob=$('knob');
@@ -777,8 +789,8 @@ function showLevelUp(){state='levelup';let a=availUps(player).sort(()=>rnd()-.5)
     d.addEventListener('click',()=>{applyUp(player,u.k);pending--;tone(700,1100,.1,'triangle',.06);if(pending>0)showLevelUp();else{$('lvup').classList.remove('on');state='play';}});box.appendChild(d);});
   $('lvup').classList.add('on');}
 function endGame(win){if(state==='over')return;if(won)win=true;state='over';for(const q of shots){scene.remove(q.m);q.m.material.dispose();}shots.length=0;$('low').style.display='none';$('rage').classList.remove('on');$('bossIntro').classList.remove('on');$('hpArrow').style.display='none';document.body.classList.remove('playing');$('lvup').classList.remove('on');
-  $('endT').textContent=win?'农场保住啦！':'被赶出农场了…';$('endS').textContent=win?'拱拱灰溜溜地跑回了树林，丰收节照常举行！':(phase==='boss'?'差一点就赶跑拱拱了，再试一次':'多收集胡萝卜，长大了再去碰大个子');
-  const m=Math.floor(playT/60),s=String(Math.floor(playT%60)).padStart(2,'0');$('endStats').innerHTML=`<div><b>Lv.${player.lv}</b>等级</div><div><b>${player.kills}</b>赶跑捣蛋鬼</div><div><b>${player.carrots}</b>胡萝卜</div><div><b>${m}:${s}</b>用时</div>`;{const r=saveRun(win),er=$('endRank');er.textContent='';const b=document.createElement('b');b.textContent=r.run.s;er.append('得分 ',b);if(r.record){const e=document.createElement('em');e.textContent='个人新纪录';er.appendChild(e);}$('bname').value=myName();$('endName').style.display='';}
+  $('endT').textContent=win?'农场保住啦！':'被赶出农场了…';$('endS').textContent='坚持到第 '+day+' 天，赶跑拱拱 '+bossKills+' 次';
+  const m=Math.floor(playT/60),s=String(Math.floor(playT%60)).padStart(2,'0');$('endStats').innerHTML=`<div><b>Lv.${player.lv}</b>等级</div><div><b>${player.kills}</b>赶跑捣蛋鬼</div><div><b>${player.carrots}</b>胡萝卜</div><div><b>${day}</b>天数</div><div><b>${m}:${s}</b>用时</div>`;{const r=saveRun(win),er=$('endRank');er.textContent='';const b=document.createElement('b');b.textContent=r.run.s;er.append('得分 ',b);if(r.record){const e=document.createElement('em');e.textContent='个人新纪录';er.appendChild(e);}$('bname').value=myName();$('endName').style.display='';}
   $('end').classList.add('on');if(win)SFX.win();}
 $('again').addEventListener('click',()=>location.reload());
 /* ---- overall leaderboard (saved on this device; farm residents are fixed benchmark entries) ---- */
@@ -791,13 +803,13 @@ async function pushScore(run){if(!SUPA.url)return false;try{const r=await fetch(
 async function fetchTop(){if(!SUPA.url)return null;try{const r=await fetch(SUPA.url+'/rest/v1/scores?select=name,score,lv,win&order=score.desc&limit=30',{headers:supaHead()});return r.ok?await r.json():null;}catch(e){return null;}}
 if(!LS.get('farmBattle.name',''))LS.set('farmBattle.name','小菜农'+(1000+ri(9000)));
 const myName=()=>(LS.get('farmBattle.name','')||'小菜农');
-function calcScore(win){return player.lv*100+player.kills*60+player.carrots*2+(win?2000:0);}
-function saveRun(win){const run={n:myName(),s:calcScore(win),lv:player.lv,k:player.kills,w:win?1:0,t:player.type,d:Date.now()};const a=LS.get('farmBattle.board.v1',[]);const best=a.length?Math.max(...a.map(r=>r.s)):-1;a.push(run);a.sort((x,y)=>y.s-x.s);{const keep=a.slice(0,20);if(!keep.includes(run))keep.push(run);LS.set('farmBattle.board.v1',keep);}lastRun=run.d;
+function calcScore(){return Math.min(60000,player.lv*100+player.kills*60+player.carrots*2+bossKills*2000);}
+function saveRun(win){const run={n:myName(),s:calcScore(win),lv:player.lv,k:player.kills,w:bossKills>0?1:0,t:player.type,d:Date.now()};const a=LS.get('farmBattle.board.v1',[]);const best=a.length?Math.max(...a.map(r=>r.s)):-1;a.push(run);a.sort((x,y)=>y.s-x.s);{const keep=a.slice(0,20);if(!keep.includes(run))keep.push(run);LS.set('farmBattle.board.v1',keep);}lastRun=run.d;
   const rank=1+a.filter(r=>r.s>run.s).length;return{run,rank,record:run.s>best};}
 /* the board always shows the shared (all players) list; device storage is only used to queue uploads and to know which rows are yours */
 function renderBoard(rows,msg,mine){const loc=LS.get('farmBattle.board.v1',[]),lr=loc.find(r=>r.d===lastRun),box=$('blist');box.innerHTML='';
-  const all=(rows||[]).map((r,i)=>({rk:i+1,n:String(r.name),s:r.score,sub:'Lv.'+r.lv+(r.win?' · 赶跑了拱拱':''),me:loc.some(q=>q.up&&q.n===r.name&&q.s===r.score),nw:!!lr&&r.name===lr.n&&r.score===lr.s}));
-  if(mine&&lr&&!all.some(r=>r.nw))all.push({rk:mine,n:lr.n,s:lr.s,sub:'Lv.'+lr.lv+(lr.w?' · 赶跑了拱拱':''),me:1,nw:1});
+  const all=(rows||[]).map((r,i)=>({rk:i+1,n:String(r.name),s:r.score,sub:'Lv.'+r.lv+(r.win?' · 赶跑过拱拱':''),me:loc.some(q=>q.up&&q.n===r.name&&q.s===r.score),nw:!!lr&&r.name===lr.n&&r.score===lr.s}));
+  if(mine&&lr&&!all.some(r=>r.nw))all.push({rk:mine,n:lr.n,s:lr.s,sub:'Lv.'+lr.lv+(lr.w?' · 赶跑过拱拱':''),me:1,nw:1});
   all.forEach(r=>{const d=document.createElement('div');d.className='bi'+(r.me?' me':'')+(r.nw?' new':'');const u=document.createElement('u');u.textContent=r.rk;const sp=document.createElement('span');sp.textContent=r.n;
     if(r.sub){const sm=document.createElement('small');sm.textContent=r.sub;sp.appendChild(sm);}const b=document.createElement('b');b.textContent=r.s;d.append(u,sp,b);box.appendChild(d);});
   if(!all.length){const d=document.createElement('div');d.className='sub';d.style.margin='10px 0';d.textContent=msg||'';box.appendChild(d);}
@@ -815,13 +827,14 @@ function openBoard(){$('boardAgain').style.display=state==='over'?'':'none';$('b
 $('boardBtn').addEventListener('click',()=>{unlockAudio();openBoard();});$('boardX').addEventListener('click',()=>$('board').classList.remove('on'));$('boardAgain').addEventListener('click',()=>location.reload());
 function confirmName(){if($('endName').style.display==='none')return;const v=$('bname').value.trim().slice(0,8)||myName();LS.set('farmBattle.name',v);const a=LS.get('farmBattle.board.v1',[]);for(const r of a)if(r.d===lastRun){r.n=v;r.c=1;}LS.set('farmBattle.board.v1',a);$('endName').style.display='none';openBoard();}
 $('endOk').addEventListener('click',confirmName);$('bname').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229)confirmName();});
-const QUESTS=[{t:'收集胡萝卜',n:8,f:()=>player.carrots},{t:'升到 5 级',n:5,f:()=>player.lv},{t:'赶跑捣蛋鬼',n:2,f:()=>player.kills},{t:'升到 12 级',n:12,f:()=>player.lv},{t:'赶跑大野猪拱拱',n:1,f:()=>boss&&!boss.alive?1:0}];let qi=0;
+const QUESTS=[{t:'收集胡萝卜',n:8,f:()=>player.carrots},{t:'升到 5 级',n:5,f:()=>player.lv},{t:'赶跑捣蛋鬼',n:2,f:()=>player.kills},{t:'升到 12 级',n:12,f:()=>player.lv},{t:'赶跑大野猪拱拱',get n(){return bossKills+1;},f:()=>bossKills}];let qi=0;
 function updateHud(){const st=stats(player);$('lv').textContent=player.lv>=MAXLV?'满':player.lv;$('lv').style.setProperty('--k',player.lv>99?.66:player.lv>9?.86:1);$('hpbar').firstChild.style.width=clamp(player.hp/st.maxhp*100,0,100)+'%';$('xpbar').firstChild.style.width=(player.lv>=MAXLV?100:player.xp/needXp(player.lv)*100)+'%';
   $('kills').textContent='赶跑捣蛋鬼 '+player.kills;$('dash').style.setProperty('--e',player.energy/100);
   while(qi<QUESTS.length-1&&QUESTS[qi].f()>=QUESTS[qi].n){qi++;showBanner('任务完成！',1.2);}
   const q=QUESTS[qi],v=Math.min(q.n,q.f());$('qi').textContent=(qi+1)+' / '+QUESTS.length;$('qt').textContent=q.t;$('qn').textContent=v+' / '+q.n;$('qb').style.width=v/q.n*100+'%';
   $('low').style.display=player.alive&&player.hp<st.maxhp*.3?'block':'none';
   {const hurry=phase==='day'&&timeLeft<10;$('timer').classList.toggle('hurry',hurry);if(hurry&&Math.ceil(timeLeft)!==lastTick){lastTick=Math.ceil(timeLeft);tone(1000,1000,.06,'square',.04);}}
+  $('tlabel').textContent='第 '+day+' 天';
   if(phase==='day')$('time').textContent=Math.floor(timeLeft/60)+':'+String(Math.floor(timeLeft%60)).padStart(2,'0');
   const s=$('status'),msg=player.corn?'躲进玉米地 · 对手看不见你':player.mud?'泥地 · 减速':'';if(msg){s.textContent=msg;s.classList.add('on');}else s.classList.remove('on');}
 
@@ -884,6 +897,10 @@ function step(dt){simT+=dt;if(state!=='play')return;playT+=dt;streakT-=dt;pickT-
         if(!dead&&boss&&boss.alive&&player.alive&&phase==='boss'&&p.owner===player&&Math.hypot(boss.x-px,boss.z-pz)<boss.R){dead=true;hitBoss(p.dmg,px,pz);}}}
     if(dead){if(near(px,pz))puff(px,p.m.position.y,pz,p.m.material.color.getHex(),3,2.2,.5);scene.remove(p.m);p.m.material.dispose();shots.splice(i,1);}}
   if(phase==='boss'&&boss.alive&&player.alive)bossUpdate(dt);
+  if(nextDayT>0){nextDayT-=dt;if(nextDayT<=0&&player.alive)startDay();}
+  if(phase==='day'){/* keep the opposition level with the player: weak stragglers catch up, and the field slowly fills */
+    catchT-=dt;if(catchT<=0){catchT=6;let w=null;for(const v of vehicles)if(!v.isPlayer&&v.alive&&v.lv<player.lv-2&&(!w||v.lv<w.lv))w=v;if(w){setLevel(w,clamp(player.lv-Math.floor(rnd(0,2)),1,MAXLV));if(near(w.x,w.z)){puff(w.x,1.5,w.z,0xffe45c,8,4,1);emote(w,'我也变强了！',1.4);}}}
+    addT-=dt;if(addT<=0){addT=30;if(vehicles.length-1<MAXEN){const v=makeVehicle(3+ri(3),false);v.alive=false;v.vis.root.visible=false;v.tag.style.display='none';v.respawn=.1;}}}
   /* carrots */
   for(let i=carrots.length-1;i>=0;i--){const c=carrots[i];c.t+=dt;if(c.vy||c.y>.9){c.vy-=22*dt;c.y+=c.vy*dt;c.x=clamp(c.x+c.vx*dt,-HALF+2,HALF-2);c.z=clamp(c.z+c.vz*dt,-HALF+2,HALF-2);if(c.y<=.9){c.y=.9;c.vy=0;c.vx=c.vz=0;}}
     let got=null;for(const v of vehicles){if(!v.alive)continue;const dx=v.x-c.x,dz=v.z-c.z,d=Math.hypot(dx,dz),mg=stats(v).magnet;if(d<mg&&c.y<=.95){const s=(mg+.4-d)*5*dt/Math.max(d,.01);c.x+=dx*s;c.z+=dz*s;}if(d<1.3*v.scale+.3){got=v;break;}}
@@ -919,7 +936,7 @@ function fx(dt){rgbMat.emissive.setHSL((simT*.12)%1,1,.5);for(let i=rings.length
 const AUTO=Q.has('auto');const tmpC=new THREE.Color(),CAMK=+(Q.get('cam')||1),CAMY=+(Q.get('camy')||1);
 
 function render(dt){let cx=0,cz=0,target=1;
-  if(player){cx=player.x;cz=player.z;target=1+(player.vscale-1)*.75;if(phase==='boss'&&boss.alive){target=Math.max(target,1.75);cx=player.x*.8+boss.x*.2;cz=player.z*.8+boss.z*.2;}
+  if(player){cx=player.x;cz=player.z;target=1+(player.vscale-1)*.95;if(phase==='boss'&&boss.alive){target=Math.max(target,1.75);cx=player.x*.8+boss.x*.2;cz=player.z*.8+boss.z*.2;}
     if(phase==='intro'){const k=clamp(Math.min(introT/.6,(3-introT)/.5),0,1),m=k*k*(3-2*k)*.92;cx=player.x+(boss.x-player.x)*m;cz=player.z+(boss.z-player.z)*m;target=1.2;}}
   else{target=1.6;cx=Math.sin(simT*.12)*14;cz=Math.cos(simT*.12)*10;}
   camF+=(target-camF)*Math.min(1,dt*2.5);shake=Math.max(0,shake-dt*1.6);const sx=(rnd()-.5)*shake*.5,sz=(rnd()-.5)*shake*.5;
@@ -931,6 +948,7 @@ function render(dt){let cx=0,cz=0,target=1;
   {const ar=$('hpArrow');let show=false;if(player&&player.alive&&state==='play'&&hearts.length&&player.hp<stats(player).maxhp*.6){let best=null,bd=1e9;for(const h of hearts){const d=Math.hypot(h.x-player.x,h.z-player.z);if(d<bd){bd=d;best=h;}}
     tmp.set(best.x,1,best.z).project(camera);if(Math.abs(tmp.x)>.9||Math.abs(tmp.y)>.85){const a=Math.atan2(best.z-player.z,best.x-player.x),R=Math.min(innerWidth,innerHeight)*.36;ar.style.left=innerWidth/2+Math.cos(a)*R*1.25+'px';ar.style.top=innerHeight/2+Math.sin(a)*R+'px';ar.style.setProperty('--a',a*180/Math.PI+'deg');show=true;}}
     ar.style.display=show?'block':'none';}
+  if(boss){const show=boss.alive&&boss.g.visible&&(phase==='boss'||phase==='intro');if(show){tmp.set(boss.x,7.2*boss.g.scale.x/1.15,boss.z).project(camera);const on=Math.abs(tmp.x)<1.1&&Math.abs(tmp.y)<1.1;boss.tag.style.display=on?'flex':'none';if(on){boss.tag.style.left=(tmp.x*.5+.5)*innerWidth+'px';boss.tag.style.top=(-tmp.y*.5+.5)*innerHeight+'px';boss.tag.children[1].firstChild.style.width=clamp(boss.hp/boss.max*100,0,100)+'%';}}else boss.tag.style.display='none';}
   if(blobs){let n=0;for(const v of vehicles){if(!v.alive||n>=23)continue;dummy.position.set(v.x-.25,.06,v.z+.2);dummy.rotation.set(-Math.PI/2,0,v.h);dummy.scale.set(1.5*v.vscale,2.1*v.vscale,1);dummy.updateMatrix();blobs.setMatrixAt(n++,dummy.matrix);}
     if(boss&&boss.g.visible){dummy.position.set(boss.x-.4,.06,boss.z+.3);dummy.rotation.set(-Math.PI/2,0,boss.h);const bs=boss.g.scale.x/1.15;dummy.scale.set(3*bs,4.2*bs,1);dummy.updateMatrix();blobs.setMatrixAt(n++,dummy.matrix);}blobs.count=n;blobs.instanceMatrix.needsUpdate=true;}
   renderer.render(scene,camera);}
