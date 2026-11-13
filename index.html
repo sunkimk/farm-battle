@@ -180,8 +180,8 @@
   <div class="tip last">丰收节前夜，大野猪拱拱带着捣蛋鬼来抢收成：开上农机，守住农场！</div>
 </div></div>
 <div id="dex" class="overlay"><div class="sheet panel"><h2>农场图鉴</h2><div class="dexg" id="dexg"></div><div class="btn" id="dexX">关闭</div></div></div>
-<div id="board" class="overlay"><div class="sheet panel"><h2>排行榜</h2>
-  <div class="blist" id="blist"></div><div class="sub" id="bnote" style="margin:8px 0 0;font-size:13px">这台设备上的成绩</div><div class="mrow" style="margin-top:12px"><div class="btn alt" id="boardX">关闭</div><div class="btn" id="boardAgain" style="display:none">再来一局</div></div></div></div>
+<div id="board" class="overlay"><div class="sheet panel"><h2>总排行榜</h2>
+  <div class="blist" id="blist"></div><div class="sub" id="bnote" style="margin:8px 0 0;font-size:13px"></div><div class="mrow" style="margin-top:12px"><div class="btn alt" id="boardX">关闭</div><div class="btn" id="boardAgain" style="display:none">再来一局</div></div></div></div>
 <div id="lvup" class="overlay"><div class="sheet panel"><h2>升级啦！</h2><div class="sub">从农具棚里挑一件改装件</div><div class="ups" id="ups"></div></div></div>
 <div id="end" class="overlay"><div class="sheet panel"><h2 id="endT"></h2><div class="sub" id="endS"></div><div class="stats" id="endStats"></div><div id="endRank"></div><div class="brow0" id="endName"><input id="bname" maxlength="8" autocomplete="off" aria-label="你的名字"><div class="btn" id="endOk">确认上榜</div></div><div class="mrow" style="margin-top:10px"><div class="btn alt" id="again">再来一局</div></div></div></div>
 
@@ -778,7 +778,7 @@ function showLevelUp(){state='levelup';let a=availUps(player).sort(()=>rnd()-.5)
   $('lvup').classList.add('on');}
 function endGame(win){if(state==='over')return;if(won)win=true;state='over';for(const q of shots){scene.remove(q.m);q.m.material.dispose();}shots.length=0;$('low').style.display='none';$('rage').classList.remove('on');$('bossIntro').classList.remove('on');$('hpArrow').style.display='none';document.body.classList.remove('playing');$('lvup').classList.remove('on');
   $('endT').textContent=win?'农场保住啦！':'被赶出农场了…';$('endS').textContent=win?'拱拱灰溜溜地跑回了树林，丰收节照常举行！':(phase==='boss'?'差一点就赶跑拱拱了，再试一次':'多收集胡萝卜，长大了再去碰大个子');
-  const m=Math.floor(playT/60),s=String(Math.floor(playT%60)).padStart(2,'0');$('endStats').innerHTML=`<div><b>Lv.${player.lv}</b>等级</div><div><b>${player.kills}</b>赶跑捣蛋鬼</div><div><b>${player.carrots}</b>胡萝卜</div><div><b>${m}:${s}</b>用时</div>`;{const r=saveRun(win),er=$('endRank');er.textContent='';const b=document.createElement('b');b.textContent=r.run.s;er.append('得分 ',b,' · 本机第 '+r.rank+' 名');if(r.record){const e=document.createElement('em');e.textContent='新纪录';er.appendChild(e);}$('bname').value=myName();$('endName').style.display='';}
+  const m=Math.floor(playT/60),s=String(Math.floor(playT%60)).padStart(2,'0');$('endStats').innerHTML=`<div><b>Lv.${player.lv}</b>等级</div><div><b>${player.kills}</b>赶跑捣蛋鬼</div><div><b>${player.carrots}</b>胡萝卜</div><div><b>${m}:${s}</b>用时</div>`;{const r=saveRun(win),er=$('endRank');er.textContent='';const b=document.createElement('b');b.textContent=r.run.s;er.append('得分 ',b);if(r.record){const e=document.createElement('em');e.textContent='个人新纪录';er.appendChild(e);}$('bname').value=myName();$('endName').style.display='';}
   $('end').classList.add('on');if(win)SFX.win();}
 $('again').addEventListener('click',()=>location.reload());
 /* ---- overall leaderboard (saved on this device; farm residents are fixed benchmark entries) ---- */
@@ -794,23 +794,24 @@ const myName=()=>(LS.get('farmBattle.name','')||'小菜农');
 function calcScore(win){return player.lv*100+player.kills*60+player.carrots*2+(win?2000:0);}
 function saveRun(win){const run={n:myName(),s:calcScore(win),lv:player.lv,k:player.kills,w:win?1:0,t:player.type,d:Date.now()};const a=LS.get('farmBattle.board.v1',[]);const best=a.length?Math.max(...a.map(r=>r.s)):-1;a.push(run);a.sort((x,y)=>y.s-x.s);{const keep=a.slice(0,20);if(!keep.includes(run))keep.push(run);LS.set('farmBattle.board.v1',keep);}lastRun=run.d;
   const rank=1+a.filter(r=>r.s>run.s).length;return{run,rank,record:run.s>best};}
-function renderBoard(online){const loc=LS.get('farmBattle.board.v1',[]),lr=loc.find(r=>r.d===lastRun);let all;
-  if(online&&online.length)all=online.map((r,i)=>({rk:i+1,n:String(r.name),s:r.score,sub:'Lv.'+r.lv+(r.win?' · 赶跑了拱拱':''),me:loc.some(q=>q.up&&q.n===r.name&&q.s===r.score),nw:!!lr&&r.name===lr.n&&r.score===lr.s}));
-  else{const m=loc.map((r,i)=>({rk:i+1,n:r.n||myName(),s:r.s,me:1,sub:'Lv.'+r.lv+(r.w?' · 赶跑了拱拱':''),nw:r.d===lastRun}));all=m.slice(0,10);const cur=m.find(r=>r.nw);if(cur&&!all.includes(cur))all.push(cur);}
-  const box=$('blist');box.innerHTML='';
+/* the board always shows the shared (all players) list; device storage is only used to queue uploads and to know which rows are yours */
+function renderBoard(rows,msg,mine){const loc=LS.get('farmBattle.board.v1',[]),lr=loc.find(r=>r.d===lastRun),box=$('blist');box.innerHTML='';
+  const all=(rows||[]).map((r,i)=>({rk:i+1,n:String(r.name),s:r.score,sub:'Lv.'+r.lv+(r.win?' · 赶跑了拱拱':''),me:loc.some(q=>q.up&&q.n===r.name&&q.s===r.score),nw:!!lr&&r.name===lr.n&&r.score===lr.s}));
+  if(mine&&lr&&!all.some(r=>r.nw))all.push({rk:mine,n:lr.n,s:lr.s,sub:'Lv.'+lr.lv+(lr.w?' · 赶跑了拱拱':''),me:1,nw:1});
   all.forEach(r=>{const d=document.createElement('div');d.className='bi'+(r.me?' me':'')+(r.nw?' new':'');const u=document.createElement('u');u.textContent=r.rk;const sp=document.createElement('span');sp.textContent=r.n;
     if(r.sub){const sm=document.createElement('small');sm.textContent=r.sub;sp.appendChild(sm);}const b=document.createElement('b');b.textContent=r.s;d.append(u,sp,b);box.appendChild(d);});
-  if(!all.length){const d=document.createElement('div');d.className='sub';d.style.margin='6px 0 0';d.textContent='还没有成绩，打一局试试！';box.appendChild(d);}
+  if(!all.length){const d=document.createElement('div');d.className='sub';d.style.margin='10px 0';d.textContent=msg||'';box.appendChild(d);}
   const nw=box.querySelector('.new');if(nw)box.scrollTop=Math.max(0,nw.offsetTop-box.offsetTop-box.clientHeight/2+nw.offsetHeight/2);else box.scrollTop=0;}
+async function fetchRank(score){try{const r=await fetch(SUPA.url+'/rest/v1/scores?select=id&score=gt.'+score+'&limit=1',{headers:{...supaHead(),Prefer:'count=exact'}});const cr=r.headers.get('content-range'),n=cr?parseInt(cr.split('/')[1],10):NaN;return isNaN(n)?null:n+1;}catch(e){return null;}}
 let boardBusy=false;
 /* uploads every confirmed run that has not reached the server yet (so a failed upload is retried next time), then loads the top list */
-async function syncBoard(){$('bnote').textContent='正在读取总榜…';let failed=false;const pend=LS.get('farmBattle.board.v1',[]).filter(r=>r.c&&!r.up);
+async function syncBoard(){$('bnote').textContent='';renderBoard(null,'正在读取总榜…');let failed=false;const pend=LS.get('farmBattle.board.v1',[]).filter(r=>r.c&&!r.up);
   for(const r of pend){const ok=await pushScore(r);if(ok){const b=LS.get('farmBattle.board.v1',[]);for(const q of b)if(q.d===r.d)q.up=1;LS.set('farmBattle.board.v1',b);}else failed=true;}
-  const rows=await fetchTop(),tail=failed?' · 有成绩没传上去，下次打开榜单会自动重试':'';
-  if(rows&&rows.length){renderBoard(rows);$('bnote').textContent='所有玩家的成绩 · 前 30 名'+tail;}
-  else{renderBoard();$('bnote').textContent=(rows?'总榜还没有人上榜，先显示这台设备上的成绩':'总榜暂时连不上，先显示这台设备上的成绩')+tail;}}
-function openBoard(){renderBoard();$('boardAgain').style.display=state==='over'?'':'none';$('board').classList.add('on');
-  if(!SUPA.url)$('bnote').textContent='这台设备上的成绩';else if(!boardBusy){boardBusy=true;syncBoard().finally(()=>{boardBusy=false;});}}
+  const rows=await fetchTop(),tail=failed?'成绩还没传上去，下次打开榜单会自动重试':'';
+  if(!rows){renderBoard(null,'总榜暂时连不上，请稍后再试');$('bnote').textContent=tail;return;}
+  const lr=LS.get('farmBattle.board.v1',[]).find(r=>r.d===lastRun),mine=lr&&lr.up?await fetchRank(lr.s):null;
+  renderBoard(rows,'还没有人上榜，打一局来当第一名！',mine);$('bnote').textContent='所有玩家的成绩 · 前 30 名'+(mine?' · 你这局排第 '+mine+' 名':'')+(tail?' · '+tail:'');}
+function openBoard(){$('boardAgain').style.display=state==='over'?'':'none';$('board').classList.add('on');if(!boardBusy){boardBusy=true;syncBoard().finally(()=>{boardBusy=false;});}}
 $('boardBtn').addEventListener('click',()=>{unlockAudio();openBoard();});$('boardX').addEventListener('click',()=>$('board').classList.remove('on'));$('boardAgain').addEventListener('click',()=>location.reload());
 function confirmName(){if($('endName').style.display==='none')return;const v=$('bname').value.trim().slice(0,8)||myName();LS.set('farmBattle.name',v);const a=LS.get('farmBattle.board.v1',[]);for(const r of a)if(r.d===lastRun){r.n=v;r.c=1;}LS.set('farmBattle.board.v1',a);$('endName').style.display='none';openBoard();}
 $('endOk').addEventListener('click',confirmName);$('bname').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229)confirmName();});
